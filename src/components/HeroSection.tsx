@@ -2,6 +2,7 @@
 
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
+import Link from 'next/link';
 import { AnimatedCharacter, MagneticButton } from './AnimatedSection';
 
 export default function HeroSection() {
@@ -77,12 +78,16 @@ export default function HeroSection() {
           transition={{ duration: 0.8, delay: 1.5 }}
           className="flex flex-col sm:flex-row gap-4 justify-center items-center"
         >
-          <MagneticButton className="px-10 py-4 bg-[#00F0FF] text-[#050505] font-bold text-base rounded-xl tracking-wide glow-cyan">
-            Enter the Chain
-          </MagneticButton>
-          <MagneticButton className="px-10 py-4 border border-[#00F0FF]/30 text-[#00F0FF] font-bold text-base rounded-xl tracking-wide hover:bg-[#00F0FF]/10 transition-colors">
-            Read the Lore
-          </MagneticButton>
+          <Link href="/dashboard">
+            <MagneticButton className="px-10 py-4 bg-[#00F0FF] text-[#050505] font-bold text-base rounded-xl tracking-wide glow-cyan">
+              Enter the Chain
+            </MagneticButton>
+          </Link>
+          <Link href="#genesis">
+            <MagneticButton className="px-10 py-4 border border-[#00F0FF]/30 text-[#00F0FF] font-bold text-base rounded-xl tracking-wide hover:bg-[#00F0FF]/10 transition-colors">
+              Read the Lore
+            </MagneticButton>
+          </Link>
         </motion.div>
 
         {/* Stats bar */}

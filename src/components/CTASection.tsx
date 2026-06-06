@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import AnimatedSection, { MagneticButton } from './AnimatedSection';
 
 export default function CTASection() {
@@ -46,9 +47,11 @@ export default function CTASection() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
-            <MagneticButton className="px-12 py-5 bg-[#00F0FF] text-[#050505] font-bold text-lg rounded-xl tracking-wide glow-cyan">
-              Launch App
-            </MagneticButton>
+            <Link href="/dashboard">
+              <MagneticButton className="px-12 py-5 bg-[#00F0FF] text-[#050505] font-bold text-lg rounded-xl tracking-wide glow-cyan">
+                Launch App
+              </MagneticButton>
+            </Link>
             <MagneticButton className="px-12 py-5 border border-[#8B5CF6]/30 text-[#8B5CF6] font-bold text-lg rounded-xl tracking-wide hover:bg-[#8B5CF6]/10 transition-colors">
               Join Discord
             </MagneticButton>
@@ -62,13 +65,19 @@ export default function CTASection() {
             transition={{ delay: 0.3 }}
             className="flex flex-wrap justify-center gap-6 text-[#6B6B80] text-sm"
           >
-            {['Documentation', 'GitHub', 'Twitter', 'Discord', 'Blog'].map((link) => (
+            {[
+              { label: 'Dashboard', href: '/dashboard' },
+              { label: 'Sitemap', href: '/sitemap' },
+              { label: 'GitHub', href: 'https://github.com/allinoneacount1-dot/the-autonomous-chain' },
+              { label: 'Twitter', href: 'https://x.com/vaultmarco' },
+              { label: 'Discord', href: '#' },
+            ].map((link) => (
               <a
-                key={link}
-                href="#"
+                key={link.label}
+                href={link.href}
                 className="hover:text-[#00F0FF] transition-colors"
               >
-                {link}
+                {link.label}
               </a>
             ))}
           </motion.div>

@@ -14,8 +14,8 @@ export default function RoadmapSection() {
   return (
     <section id="roadmap" className="section">
       <div className="container">
-        <AnimatedSection className="text-center mb-14">
-          <p className="font-mono text-xs tracking-[0.25em] uppercase mb-4" style={{ color: '#00d4ff' }}>
+        <AnimatedSection className="text-center mb-16">
+          <p className="font-mono text-xs tracking-[0.2em] uppercase mb-4" style={{ color: '#00d4ff' }}>
             // Roadmap
           </p>
           <h2 className="font-mono text-[clamp(2rem,4vw,3rem)] font-bold" style={{ color: '#ededed' }}>
@@ -23,40 +23,58 @@ export default function RoadmapSection() {
           </h2>
         </AnimatedSection>
 
-        <div className="bento-grid">
-          {phases.map((p, i) => (
-            <AnimatedSection key={p.phase} delay={i * 0.06}>
-              <motion.div
-                whileHover={{ y: -6 }}
-                transition={{ type: 'spring', stiffness: 300 }}
-                className={`glass glass-hover p-6 h-full flex flex-col ${
-                  p.status === 'active' ? '' : ''
-                }`}
-                style={p.status === 'active' ? { borderColor: 'rgba(0,212,255,0.2)' } : {}}
-              >
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="font-mono text-xs font-bold" style={{
-                    color: p.status === 'done' ? '#666666' : p.status === 'active' ? '#00d4ff' : '#333333'
-                  }}>
-                    Phase {p.phase}
-                  </span>
+        {/* Horizontal timeline dengan garis penghubung */}
+        <div className="relative">
+          {/* Garis vertikal penghubung di desktop */}
+          <div className="hidden lg:block absolute top-6 left-0 right-0 h-[1px]" style={{ background: 'rgba(255,255,255,0.04)' }} />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            {phases.map((p, i) => (
+              <AnimatedSection key={p.phase} delay={i * 0.06}>
+                <motion.div
+                  whileHover={{ y: -4 }}
+                  transition={{ type: 'spring', stiffness: 400 }}
+                  className="p-6 h-full flex flex-col relative"
+                  style={{
+                    background: 'rgba(255,255,255,0.015)',
+                    borderRadius: '16px',
+                    border: p.status === 'active' ? '1px solid rgba(0,212,255,0.15)' : '1px solid transparent',
+                  }}
+                >
+                  {/* Timeline dot */}
+                  <div className="w-3 h-3 rounded-full mx-auto mb-4 relative z-10" style={{
+                    background: p.status === 'done' ? '#555' : p.status === 'active' ? '#00d4ff' : '#222',
+                    boxShadow: p.status === 'active' ? '0 0 12px rgba(0,212,255,0.3)' : 'none',
+                  }} />
+
+                  <div className="text-center">
+                    <span className="font-mono text-[10px] uppercase tracking-wider" style={{
+                      color: p.status === 'done' ? '#555' : p.status === 'active' ? '#00d4ff' : '#333'
+                    }}>
+                      Phase {p.phase}
+                    </span>
+                    <h3 className="font-mono text-sm font-bold mt-1 mb-0.5" style={{ color: '#ededed' }}>{p.title}</h3>
+                    <span className="font-mono text-[10px]" style={{ color: '#333' }}>{p.date}</span>
+                  </div>
+
+                  <ul className="mt-4 space-y-1 flex-1">
+                    {p.items.map((item) => (
+                      <li key={item} className="text-[11px] flex items-start gap-2" style={{ color: '#888' }}>
+                        <span style={{ color: '#333' }}>—</span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+
                   {p.status === 'active' && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#00d4ff] animate-pulse" />
+                    <div className="mt-3 text-center">
+                      <span className="badge badge-active">In Progress</span>
+                    </div>
                   )}
-                </div>
-                <h3 className="font-mono text-sm font-bold mb-1" style={{ color: '#ededed' }}>{p.title}</h3>
-                <span className="font-mono text-[10px] mb-4" style={{ color: '#333333' }}>{p.date}</span>
-                <ul className="space-y-1.5 flex-1">
-                  {p.items.map((item) => (
-                    <li key={item} className="text-xs flex items-start gap-2" style={{ color: '#a3a3a3' }}>
-                      <span style={{ color: '#333333' }}>—</span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            </AnimatedSection>
-          ))}
+                </motion.div>
+              </AnimatedSection>
+            ))}
+          </div>
         </div>
       </div>
     </section>

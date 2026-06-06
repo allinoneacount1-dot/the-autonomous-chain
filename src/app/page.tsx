@@ -23,7 +23,6 @@ export default function Home() {
     <main className="relative min-h-screen overflow-x-hidden" style={{ background: '#0a0a0a' }}>
       <Scene3D />
       <Navbar />
-
       <div className="relative z-10">
         <HeroSection />
         <StatsSection />

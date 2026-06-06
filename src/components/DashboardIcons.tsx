@@ -72,3 +72,27 @@ export function IconLoader({ className = '', size = 20, style }: IconProps) {
     <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
   </S>;
 }
+
+export function IconTrendingUp({ className = '', size = 20, style }: IconProps) {
+  return <S size={size} className={className} style={style}>
+    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" />
+  </S>;
+}
+
+export function IconUsers({ className = '', size = 20, style }: IconProps) {
+  return <S size={size} className={className} style={style}>
+    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 00-3-3.87" /><path d="M16 3.13a4 4 0 010 7.75" />
+  </S>;
+}
+
+export function IconShield({ className = '', size = 20, style }: IconProps) {
+  return <S size={size} className={className} style={style}>
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+  </S>;
+}
+
+export function IconZap({ className = '', size = 20, style }: IconProps) {
+  return <S size={size} className={className} style={style}>
+    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+  </S>;
+}

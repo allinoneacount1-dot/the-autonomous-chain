@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { IconLayout, IconWallet, IconVote, IconCoins, IconSettings, IconArrowRight, IconCheck, IconX, IconLoader } from '@/components/DashboardIcons';
+import { IconLayout, IconWallet, IconVote, IconCoins, IconSettings, IconArrowRight, IconCheck, IconX, IconLoader, IconTrendingUp, IconUsers, IconShield, IconZap } from '@/components/DashboardIcons';
 
 // ─── Types ───
 interface Agent {
@@ -19,6 +19,7 @@ interface Agent {
 interface Proposal {
   id: string;
   title: string;
+  category: string;
   status: 'active' | 'passed' | 'pending';
   forVotes: number;
   againstVotes: number;
@@ -40,6 +41,13 @@ interface Toast {
   message: string;
 }
 
+interface LiveFeedItem {
+  id: string;
+  type: 'stake' | 'vote' | 'claim' | 'block';
+  message: string;
+  time: string;
+}
+
 // ─── Skeleton ───
 function Skeleton({ className = '' }: { className?: string }) {
   return (
@@ -50,11 +58,11 @@ function Skeleton({ className = '' }: { className?: string }) {
 function SkeletonDashboard() {
   return (
     <div className="p-6 space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {[0,1,2].map(i => <Skeleton key={i} className="h-32" />)}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {[0,1,2].map(i => <Skeleton key={i} className="h-36" />)}
       </div>
       <Skeleton className="h-64" />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <Skeleton className="h-48" />
         <Skeleton className="h-48" />
       </div>
@@ -62,24 +70,29 @@ function SkeletonDashboard() {
   );
 }
 
-// ─── Circular Progress ───
-function CircularProgress({ value, size = 64, strokeWidth = 4, color = '#00d4ff' }: { value: number; size?: number; strokeWidth?: number; color?: string }) {
+// ─── Circular Progress (Donut) ───
+function CircularProgress({ value, size = 80, strokeWidth = 6, color = '#00d4ff' }: { value: number; size?: number; strokeWidth?: number; color?: string }) {
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
   const offset = circumference - (value / 100) * circumference;
 
   return (
-    <svg width={size} height={size} className="transform -rotate-90">
-      <circle cx={size/2} cy={size/2} r={radius} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth={strokeWidth} />
-      <motion.circle
-        cx={size/2} cy={size/2} r={radius} fill="none"
-        stroke={color} strokeWidth={strokeWidth} strokeLinecap="round"
-        strokeDasharray={circumference}
-        initial={{ strokeDashoffset: circumference }}
-        animate={{ strokeDashoffset: offset }}
-        transition={{ duration: 1.2, ease: 'easeOut' }}
-      />
-    </svg>
+    <div className="relative" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="transform -rotate-90">
+        <circle cx={size/2} cy={size/2} r={radius} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth={strokeWidth} />
+        <motion.circle
+          cx={size/2} cy={size/2} r={radius} fill="none"
+          stroke={color} strokeWidth={strokeWidth} strokeLinecap="round"
+          strokeDasharray={circumference}
+          initial={{ strokeDashoffset: circumference }}
+          animate={{ strokeDashoffset: offset }}
+          transition={{ duration: 1.2, ease: 'easeOut' }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="font-mono text-lg font-bold" style={{ color }}>{value}%</span>
+      </div>
+    </div>
   );
 }
 
@@ -112,16 +125,17 @@ function ToastContainer({ toasts, onDismiss }: { toasts: Toast[]; onDismiss: (id
             initial={{ opacity: 0, x: 40, scale: 0.95 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: 40, scale: 0.95 }}
-            className="glass px-5 py-3.5 flex items-center gap-3 min-w-[280px]"
+            className="card px-5 py-3.5 flex items-center gap-3 min-w-[280px]"
             style={{
-              borderColor: toast.type === 'success' ? 'rgba(76,175,80,0.2)' : toast.type === 'error' ? 'rgba(244,67,54,0.2)' : 'rgba(0,212,255,0.2)',
+              borderColor: toast.type === 'success' ? 'rgba(0,255,128,0.2)' : toast.type === 'error' ? 'rgba(255,77,77,0.2)' : 'rgba(0,212,255,0.2)',
+              background: '#111',
             }}
           >
             <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{
-              background: toast.type === 'success' ? 'rgba(76,175,80,0.15)' : toast.type === 'error' ? 'rgba(244,67,54,0.15)' : 'rgba(0,212,255,0.15)',
+              background: toast.type === 'success' ? 'rgba(0,255,128,0.15)' : toast.type === 'error' ? 'rgba(255,77,77,0.15)' : 'rgba(0,212,255,0.15)',
             }}>
-              {toast.type === 'success' ? <IconCheck size={12} style={{ color: '#4caf50' }} /> :
-               toast.type === 'error' ? <IconX size={12} style={{ color: '#f44336' }} /> :
+              {toast.type === 'success' ? <IconCheck size={12} style={{ color: '#00ff80' }} /> :
+               toast.type === 'error' ? <IconX size={12} style={{ color: '#ff4d4d' }} /> :
                <IconLoader size={12} style={{ color: '#00d4ff' }} />}
             </div>
             <span className="text-sm flex-1" style={{ color: '#ededed' }}>{toast.message}</span>
@@ -141,14 +155,15 @@ function Modal({ open, onClose, title, children }: { open: boolean; onClose: () 
         <motion.div
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
           className="fixed inset-0 z-50 flex items-center justify-center p-6"
-          style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)' }}
+          style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
           onClick={onClose}
         >
           <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="glass p-8 w-full max-w-md"
+            className="card w-full max-w-md"
+            style={{ background: '#111' }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-6">
@@ -160,6 +175,71 @@ function Modal({ open, onClose, title, children }: { open: boolean; onClose: () 
         </motion.div>
       )}
     </AnimatePresence>
+  );
+}
+
+// ─── Getting Started Widget ───
+function GettingStarted({ onConnect }: { onConnect: () => void }) {
+  const steps = [
+    { num: 1, title: 'Connect Wallet', desc: 'Link your wallet to access the dashboard', action: 'Connect', handler: onConnect },
+    { num: 2, title: 'Stake ACHAIN', desc: 'Earn rewards by staking in any pool', action: 'Stake', handler: () => {} },
+    { num: 3, title: 'Vote on Proposals', desc: 'Participate in governance decisions', action: 'Vote', handler: () => {} },
+  ];
+
+  return (
+    <div className="card" style={{ borderColor: 'rgba(0,212,255,0.15)' }}>
+      <div className="flex items-center gap-3 mb-5">
+        <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'rgba(0,212,255,0.1)' }}>
+          <IconZap size={18} style={{ color: '#00d4ff' }} />
+        </div>
+        <div>
+          <h3 className="font-mono text-sm font-bold" style={{ color: '#ededed' }}>Getting Started</h3>
+          <p className="text-xs" style={{ color: '#666' }}>Complete these steps to get started</p>
+        </div>
+      </div>
+      <div className="space-y-3">
+        {steps.map((step) => (
+          <div key={step.num} className="step-card">
+            <div className="step-number">{step.num}</div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-semibold" style={{ color: '#ededed' }}>{step.title}</div>
+              <div className="text-xs" style={{ color: '#666' }}>{step.desc}</div>
+            </div>
+            <button onClick={step.handler} className="btn-primary text-[10px] px-4 py-2 shrink-0">{step.action}</button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Live Feed Widget ───
+function LiveFeed() {
+  const [items] = useState<LiveFeedItem[]>([
+    { id: '1', type: 'stake', message: '0x7a3B...9f2E staked 5,000 ACHAIN in Operator Pool', time: '2m ago' },
+    { id: '2', type: 'vote', message: 'PROP-001 received 1,200 votes FOR', time: '5m ago' },
+    { id: '3', type: 'claim', message: 'Promethea claimed 340 ACHAIN rewards', time: '8m ago' },
+    { id: '4', type: 'block', message: 'Block #1,234,567 finalized — 47 txns', time: '12m ago' },
+    { id: '5', type: 'stake', message: '0x3f2A...1b8C staked 12,000 ACHAIN in Genesis Pool', time: '15m ago' },
+  ]);
+
+  return (
+    <div className="card">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#00ff80' }} />
+        <span className="font-mono text-xs font-bold uppercase tracking-wider" style={{ color: '#666' }}>Live Feed</span>
+      </div>
+      <div className="live-feed space-y-2">
+        {items.map((item) => (
+          <div key={item.id} className="flex items-start gap-2">
+            <span className="shrink-0" style={{ color: '#444' }}>{item.time}</span>
+            <span className={item.type === 'stake' ? 'highlight' : item.type === 'vote' ? '' : item.type === 'claim' ? 'success' : ''}>
+              {item.message}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -202,9 +282,9 @@ export default function DashboardPage() {
         { id: 'WRK-1003', name: 'Builder-5', class: 'Worker', staked: 3000, rewards: 90, status: 'idle', apy: 6.2 },
       ]);
       setProposals([
-        { id: 'PROP-001', title: 'Upgrade ZK Identity Protocol', status: 'active', forVotes: 6700, againstVotes: 3300, deadline: '2026-06-10' },
-        { id: 'PROP-002', title: 'Increase Operator Rewards 5%', status: 'passed', forVotes: 8200, againstVotes: 1800, deadline: '2026-06-05' },
-        { id: 'PROP-003', title: 'Deploy Cross-Chain Bridge v3', status: 'pending', forVotes: 4500, againstVotes: 2000, deadline: '2026-06-15' },
+        { id: 'PROP-001', title: 'Upgrade ZK Identity Protocol to v3', category: 'Protocol', status: 'active', forVotes: 6700, againstVotes: 3300, deadline: '2026-06-10' },
+        { id: 'PROP-002', title: 'Increase Operator Rewards by 5%', category: 'Treasury', status: 'passed', forVotes: 8200, againstVotes: 1800, deadline: '2026-06-05' },
+        { id: 'PROP-003', title: 'Deploy Cross-Chain Bridge v3', category: 'Infrastructure', status: 'pending', forVotes: 4500, againstVotes: 2000, deadline: '2026-06-15' },
       ]);
       setPools([
         { id: 'pool-operator', name: 'Operator', apy: 8.5, totalStaked: 1200000, minStake: 1000, userStaked: 12000 },
@@ -256,9 +336,9 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="min-h-screen flex" style={{ background: '#0a0a0a' }}>
-      {/* ─── Sidebar ─── */}
-      <aside className="hidden md:flex flex-col w-56 shrink-0 border-r" style={{ borderColor: 'rgba(255,255,255,0.04)', minHeight: '100vh' }}>
+    <div className="min-h-screen flex" style={{ background: '#050505' }}>
+      {/* ─── Sidebar (Desktop) ─── */}
+      <aside className="hidden md:flex flex-col w-60 shrink-0" style={{ borderRight: '1px solid #222', minHeight: '100vh', background: '#0a0a0a' }}>
         <div className="p-6">
           <Link href="/" className="font-mono text-sm font-bold" style={{ color: '#00d4ff' }}>⬡ AUTONOMOUS</Link>
         </div>
@@ -272,6 +352,7 @@ export default function DashboardPage() {
               style={{
                 background: activeTab === item.id ? 'rgba(0,212,255,0.08)' : 'transparent',
                 color: activeTab === item.id ? '#00d4ff' : '#555',
+                border: activeTab === item.id ? '1px solid rgba(0,212,255,0.1)' : '1px solid transparent',
               }}
             >
               <item.Icon size={16} />
@@ -280,14 +361,14 @@ export default function DashboardPage() {
           ))}
         </nav>
 
-        <div className="p-4 border-t" style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
+        <div className="p-4" style={{ borderTop: '1px solid #222' }}>
           {!walletConnected ? (
-            <button onClick={handleConnect} className="w-full py-2.5 text-xs font-bold font-mono rounded-lg" style={{ background: '#00d4ff', color: '#0a0a0a' }}>
+            <button onClick={handleConnect} className="btn-primary w-full">
               Connect Wallet
             </button>
           ) : (
-            <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: 'rgba(0,212,255,0.05)' }}>
-              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+            <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl" style={{ background: 'rgba(0,212,255,0.05)', border: '1px solid rgba(0,212,255,0.1)' }}>
+              <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#00ff80' }} />
               <span className="font-mono text-[10px]" style={{ color: '#00d4ff' }}>{walletAddress}</span>
             </div>
           )}
@@ -295,17 +376,17 @@ export default function DashboardPage() {
       </aside>
 
       {/* ─── Mobile Top Bar ─── */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-40 px-4 py-3 flex items-center justify-between" style={{ background: 'rgba(10,10,10,0.9)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 px-4 py-3 flex items-center justify-between nav-glass">
         <Link href="/" className="font-mono text-xs font-bold" style={{ color: '#00d4ff' }}>⬡ AUTONOMOUS</Link>
         {!walletConnected ? (
-          <button onClick={handleConnect} className="px-4 py-1.5 text-[10px] font-bold font-mono rounded-lg" style={{ background: '#00d4ff', color: '#0a0a0a' }}>Connect</button>
+          <button onClick={handleConnect} className="btn-primary text-[10px] px-4 py-2">Connect</button>
         ) : (
           <span className="font-mono text-[10px]" style={{ color: '#00d4ff' }}>{walletAddress}</span>
         )}
       </div>
 
-      {/* ─── Mobile Nav ─── */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 flex" style={{ background: 'rgba(10,10,10,0.9)', backdropFilter: 'blur(16px)', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+      {/* ─── Mobile Bottom Nav ─── */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 flex nav-glass" style={{ borderTop: '1px solid #222' }}>
         {navItems.map((item) => (
           <button
             key={item.id}
@@ -322,148 +403,254 @@ export default function DashboardPage() {
       {/* ─── Main Content ─── */}
       <main className="flex-1 overflow-y-auto" style={{ paddingBottom: '80px' }}>
         {loading ? (
-          <div className="md:ml-0 ml-0 pt-16 md:pt-0">
+          <div className="pt-16 md:pt-0">
             <SkeletonDashboard />
+          </div>
+        ) : !walletConnected ? (
+          /* ─── Empty State: Wallet Not Connected ─── */
+          <div className="p-4 md:p-8 pt-20 md:pt-8 max-w-6xl mx-auto">
+            <div className="empty-state card">
+              <div className="icon">🔗</div>
+              <h2 className="font-mono text-lg font-bold mb-2" style={{ color: '#ededed' }}>Connect Your Wallet</h2>
+              <p className="text-sm mb-6" style={{ color: '#666' }}>Connect your wallet to view your dashboard, stake ACHAIN, and participate in governance.</p>
+              <button onClick={handleConnect} className="btn-primary">Connect Wallet</button>
+            </div>
+            <div className="mt-6">
+              <GettingStarted onConnect={handleConnect} />
+            </div>
           </div>
         ) : (
           <div className="p-4 md:p-8 pt-20 md:pt-8 max-w-6xl mx-auto">
+            {/* ─── Segmented Control (Desktop) ─── */}
+            <div className="hidden md:flex items-center justify-between mb-8">
+              <div className="segmented">
+                {navItems.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id)}
+                    className={`segmented-btn ${activeTab === item.id ? 'active' : ''}`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#00ff80' }} />
+                <span className="font-mono text-[10px]" style={{ color: '#666' }}>Network Live</span>
+              </div>
+            </div>
+
+            {/* ─── Mobile Tab Label ─── */}
+            <div className="md:hidden mb-6">
+              <h1 className="font-mono text-lg font-bold" style={{ color: '#ededed' }}>
+                {navItems.find(n => n.id === activeTab)?.label}
+              </h1>
+            </div>
+
             <AnimatePresence mode="wait">
+              {/* ═══════════════════════════════════════
+                  OVERVIEW TAB — Bento Box Grid
+              ═══════════════════════════════════════ */}
               {activeTab === 'overview' && (
                 <motion.div key="overview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
-                  <h1 className="font-mono text-lg font-bold" style={{ color: '#ededed' }}>Overview</h1>
-
-                  {/* Status Cards */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="glass p-6">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs font-mono uppercase tracking-wider" style={{ color: '#555' }}>Total Staked</span>
+                  {/* Hero Stats — Bento Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    {/* Total Staked */}
+                    <div className="card">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="stat-label">Total Staked</div>
+                        <IconTrendingUp size={16} style={{ color: '#00d4ff' }} />
+                      </div>
+                      <div className="stat-value lg" style={{ color: '#ededed' }}>
+                        {totalStaked.toLocaleString()}
+                      </div>
+                      <div className="text-xs mt-1" style={{ color: '#666' }}>ACHAIN</div>
+                      <div className="mt-3">
                         <Sparkline data={[120, 135, 128, 142, 155, 148, 160, 173]} />
                       </div>
-                      <div className="font-mono text-2xl font-bold" style={{ color: '#ededed' }}>{totalStaked.toLocaleString()} <span className="text-sm" style={{ color: '#555' }}>ACHAIN</span></div>
                     </div>
 
-                    <div className="glass p-6">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs font-mono uppercase tracking-wider" style={{ color: '#555' }}>Rewards Earned</span>
-                        <Sparkline data={[100, 115, 108, 125, 140, 132, 148, 165]} color="#7c3aed" />
+                    {/* Rewards Earned */}
+                    <div className="card">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="stat-label">Rewards Earned</div>
+                        <IconCoins size={16} style={{ color: '#b897ff' }} />
                       </div>
-                      <div className="font-mono text-2xl font-bold" style={{ color: '#7c3aed' }}>{totalRewards.toLocaleString()} <span className="text-sm" style={{ color: '#555' }}>ACHAIN</span></div>
+                      <div className="stat-value lg" style={{ color: '#b897ff' }}>
+                        {totalRewards.toLocaleString()}
+                      </div>
+                      <div className="text-xs mt-1" style={{ color: '#666' }}>ACHAIN</div>
+                      <div className="mt-3">
+                        <Sparkline data={[100, 115, 108, 125, 140, 132, 148, 165]} color="#b897ff" />
+                      </div>
                     </div>
 
-                    <div className="glass p-6 flex items-center gap-5">
+                    {/* Gov Power */}
+                    <div className="card flex items-center gap-5">
                       <CircularProgress value={govPower} />
                       <div>
-                        <div className="text-xs font-mono uppercase tracking-wider mb-1" style={{ color: '#555' }}>Gov Power</div>
-                        <div className="font-mono text-xl font-bold" style={{ color: '#ededed' }}>{govPower}%</div>
+                        <div className="stat-label mb-1">Gov Power</div>
+                        <div className="text-xs" style={{ color: '#666' }}>Voting influence</div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Quick Agents */}
-                  <div className="glass p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-xs font-mono uppercase tracking-wider" style={{ color: '#555' }}>Top Agents</span>
-                      <button onClick={() => setActiveTab('agents')} className="text-xs flex items-center gap-1" style={{ color: '#00d4ff' }}>
-                        View All <IconArrowRight size={12} />
-                      </button>
-                    </div>
-                    <div className="space-y-2">
-                      {agents.slice(0, 3).map((agent) => (
-                        <div key={agent.id} className="flex items-center gap-4 p-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.02)' }}>
-                          <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'rgba(0,212,255,0.08)' }}>
-                            <span className="font-mono text-[10px] font-bold" style={{ color: '#00d4ff' }}>{agent.class[0]}</span>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="text-sm font-semibold truncate" style={{ color: '#ededed' }}>{agent.name}</div>
-                            <div className="text-[10px]" style={{ color: '#555' }}>{agent.class} · {agent.staked.toLocaleString()} staked</div>
-                          </div>
-                          <span className="px-2 py-0.5 rounded-full text-[9px] font-mono" style={{
-                            background: agent.status === 'active' ? 'rgba(76,175,80,0.1)' : 'rgba(255,152,0,0.1)',
-                            color: agent.status === 'active' ? '#4caf50' : '#ff9800',
-                          }}>
-                            {agent.status}
-                          </span>
+                  {/* Main Content Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    {/* Active Proposals — 2/3 */}
+                    <div className="md:col-span-2 card">
+                      <div className="flex items-center justify-between mb-5">
+                        <div className="flex items-center gap-2">
+                          <IconVote size={16} style={{ color: '#00d4ff' }} />
+                          <span className="font-mono text-xs font-bold uppercase tracking-wider" style={{ color: '#666' }}>Active Proposals</span>
                         </div>
-                      ))}
+                        <button onClick={() => setActiveTab('governance')} className="text-xs flex items-center gap-1" style={{ color: '#00d4ff' }}>
+                          Vote <IconArrowRight size={12} />
+                        </button>
+                      </div>
+                      <div className="space-y-3">
+                        {proposals.filter(p => p.status === 'active').map((p) => {
+                          const total = p.forVotes + p.againstVotes;
+                          const forPct = total > 0 ? (p.forVotes / total) * 100 : 0;
+                          return (
+                            <div key={p.id} className="card-alt">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-sm font-semibold truncate flex-1" style={{ color: '#ededed' }}>{p.title}</span>
+                                <span className="badge badge-active ml-3">Active</span>
+                              </div>
+                              <div className="progress-bar mb-2">
+                                <motion.div className="bar-for" initial={{ width: 0 }} animate={{ width: `${forPct}%` }} transition={{ duration: 0.8 }} />
+                                <motion.div className="bar-against" initial={{ width: 0 }} animate={{ width: `${100 - forPct}%` }} transition={{ duration: 0.8 }} />
+                              </div>
+                              <div className="flex justify-between text-[10px]">
+                                <span style={{ color: '#00ff80' }}>For {forPct.toFixed(0)}%</span>
+                                <span style={{ color: '#666' }}>{p.deadline}</span>
+                                <span style={{ color: '#ff4d4d' }}>Against {(100-forPct).toFixed(0)}%</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Top Agents — 1/3 */}
+                    <div className="card">
+                      <div className="flex items-center justify-between mb-5">
+                        <div className="flex items-center gap-2">
+                          <IconUsers size={16} style={{ color: '#00d4ff' }} />
+                          <span className="font-mono text-xs font-bold uppercase tracking-wider" style={{ color: '#666' }}>Top Agents</span>
+                        </div>
+                        <button onClick={() => setActiveTab('agents')} className="text-xs flex items-center gap-1" style={{ color: '#00d4ff' }}>
+                          All <IconArrowRight size={12} />
+                        </button>
+                      </div>
+                      <div className="space-y-3">
+                        {agents.slice(0, 3).map((agent) => (
+                          <div key={agent.id} className="flex items-center gap-3 p-3 rounded-xl" style={{ background: '#1a1a1a', border: '1px solid #222' }}>
+                            <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ background: 'rgba(0,212,255,0.08)' }}>
+                              <span className="font-mono text-[10px] font-bold" style={{ color: '#00d4ff' }}>{agent.class[0]}</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm font-semibold truncate" style={{ color: '#ededed' }}>{agent.name}</div>
+                              <div className="text-[10px]" style={{ color: '#666' }}>{agent.staked.toLocaleString()} staked</div>
+                            </div>
+                            <span className={`badge ${agent.status === 'active' ? 'badge-success' : 'badge-warning'}`}>
+                              {agent.status}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
 
-                  {/* Quick Proposals */}
-                  <div className="glass p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-xs font-mono uppercase tracking-wider" style={{ color: '#555' }}>Active Proposals</span>
-                      <button onClick={() => setActiveTab('governance')} className="text-xs flex items-center gap-1" style={{ color: '#00d4ff' }}>
-                        Vote <IconArrowRight size={12} />
-                      </button>
-                    </div>
-                    <div className="space-y-3">
-                      {proposals.filter(p => p.status === 'active').map((p) => {
-                        const total = p.forVotes + p.againstVotes;
-                        const forPct = total > 0 ? (p.forVotes / total) * 100 : 0;
-                        return (
-                          <div key={p.id} className="p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.02)' }}>
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-sm font-semibold truncate flex-1" style={{ color: '#ededed' }}>{p.title}</span>
-                              <span className="text-[10px] font-mono ml-3" style={{ color: '#555' }}>{p.deadline}</span>
+                  {/* Quick Staking + Live Feed Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    {/* Quick Stake */}
+                    <div className="card">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <IconCoins size={16} style={{ color: '#00d4ff' }} />
+                          <span className="font-mono text-xs font-bold uppercase tracking-wider" style={{ color: '#666' }}>Quick Stake</span>
+                        </div>
+                        <button onClick={() => setActiveTab('staking')} className="text-xs flex items-center gap-1" style={{ color: '#00d4ff' }}>
+                          All Pools <IconArrowRight size={12} />
+                        </button>
+                      </div>
+                      <div className="space-y-3">
+                        {pools.sort((a, b) => b.apy - a.apy).slice(0, 2).map((pool) => (
+                          <div key={pool.id} className="flex items-center justify-between p-3 rounded-xl" style={{ background: '#1a1a1a', border: '1px solid #222' }}>
+                            <div>
+                              <div className="text-sm font-semibold" style={{ color: '#ededed' }}>{pool.name} Pool</div>
+                              <div className="text-[10px]" style={{ color: '#666' }}>{(pool.totalStaked / 1000).toFixed(0)}K total staked</div>
                             </div>
-                            <div className="h-1.5 rounded-full overflow-hidden flex" style={{ background: '#1a1a1a' }}>
-                              <motion.div className="h-full bg-green-500/60" initial={{ width: 0 }} animate={{ width: `${forPct}%` }} transition={{ duration: 0.8 }} />
-                              <motion.div className="h-full bg-red-500/40" initial={{ width: 0 }} animate={{ width: `${100 - forPct}%` }} transition={{ duration: 0.8 }} />
-                            </div>
-                            <div className="flex justify-between mt-1.5">
-                              <span className="text-[10px]" style={{ color: '#4caf50' }}>For {forPct.toFixed(0)}%</span>
-                              <span className="text-[10px]" style={{ color: '#f44336' }}>Against {(100-forPct).toFixed(0)}%</span>
+                            <div className="flex items-center gap-3">
+                              <div className="apy-badge text-xs">{pool.apy}%</div>
+                              <button onClick={() => setStakeModal({ open: true, poolId: pool.id, poolName: pool.name })} className="btn-primary text-[10px] px-4 py-2">Stake</button>
                             </div>
                           </div>
-                        );
-                      })}
+                        ))}
+                      </div>
                     </div>
+
+                    {/* Live Feed */}
+                    <LiveFeed />
                   </div>
                 </motion.div>
               )}
 
+              {/* ═══════════════════════════════════════
+                  AGENTS TAB — Card-Based Grid
+              ═══════════════════════════════════════ */}
               {activeTab === 'agents' && (
                 <motion.div key="agents" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
                   <div className="flex items-center justify-between">
-                    <h1 className="font-mono text-lg font-bold" style={{ color: '#ededed' }}>Agent Management</h1>
-                    <button className="px-4 py-2 text-xs font-bold font-mono rounded-lg" style={{ background: '#00d4ff', color: '#0a0a0a' }}>+ New Agent</button>
+                    <div>
+                      <h1 className="font-mono text-lg font-bold" style={{ color: '#ededed' }}>Agent Management</h1>
+                      <p className="text-xs mt-1" style={{ color: '#666' }}>{agents.length} agents registered</p>
+                    </div>
+                    <button className="btn-primary">+ New Agent</button>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     {agents.map((agent) => (
-                      <motion.div key={agent.id} whileHover={{ y: -3 }} className="glass glass-hover p-6">
-                        <div className="flex items-start justify-between mb-4">
+                      <motion.div key={agent.id} whileHover={{ y: -3 }} className="card" style={{ borderColor: agent.status === 'active' ? 'rgba(0,255,128,0.1)' : 'rgba(255,152,0,0.1)', transition: 'border-color 0.3s ease' }}>
+                        {/* Agent Header */}
+                        <div className="flex items-start justify-between mb-5">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'rgba(0,212,255,0.08)' }}>
-                              <span className="font-mono text-xs font-bold" style={{ color: '#00d4ff' }}>{agent.class[0]}</span>
+                            <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.15)' }}>
+                              <span className="font-mono text-sm font-bold" style={{ color: '#00d4ff' }}>{agent.class[0]}</span>
                             </div>
                             <div>
                               <div className="font-mono text-sm font-bold" style={{ color: '#ededed' }}>{agent.name}</div>
-                              <div className="text-[10px]" style={{ color: '#555' }}>{agent.id} · {agent.class}</div>
+                              <div className="text-[10px] mt-0.5" style={{ color: '#666' }}>{agent.id} · {agent.class}</div>
                             </div>
                           </div>
-                          <span className="px-2 py-0.5 rounded-full text-[9px] font-mono" style={{
-                            background: agent.status === 'active' ? 'rgba(76,175,80,0.1)' : 'rgba(255,152,0,0.1)',
-                            color: agent.status === 'active' ? '#4caf50' : '#ff9800',
-                          }}>{agent.status}</span>
+                          <span className={`badge ${agent.status === 'active' ? 'badge-success' : 'badge-warning'}`}>
+                            {agent.status}
+                          </span>
                         </div>
-                        <div className="grid grid-cols-3 gap-3 mb-4">
-                          <div>
-                            <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: '#555' }}>Staked</div>
+
+                        {/* Stats Grid */}
+                        <div className="grid grid-cols-3 gap-3 mb-5">
+                          <div className="p-3 rounded-lg" style={{ background: '#1a1a1a', border: '1px solid #222' }}>
+                            <div className="stat-label mb-1">Staked</div>
                             <div className="font-mono text-sm font-bold" style={{ color: '#ededed' }}>{agent.staked.toLocaleString()}</div>
                           </div>
-                          <div>
-                            <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: '#555' }}>Rewards</div>
-                            <div className="font-mono text-sm font-bold" style={{ color: '#7c3aed' }}>{agent.rewards.toLocaleString()}</div>
+                          <div className="p-3 rounded-lg" style={{ background: '#1a1a1a', border: '1px solid #222' }}>
+                            <div className="stat-label mb-1">Rewards</div>
+                            <div className="font-mono text-sm font-bold" style={{ color: '#b897ff' }}>{agent.rewards.toLocaleString()}</div>
                           </div>
-                          <div>
-                            <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: '#555' }}>APY</div>
+                          <div className="p-3 rounded-lg" style={{ background: '#1a1a1a', border: '1px solid #222' }}>
+                            <div className="stat-label mb-1">APY</div>
                             <div className="font-mono text-sm font-bold" style={{ color: '#00d4ff' }}>{agent.apy}%</div>
                           </div>
                         </div>
-                        <div className="flex gap-2">
-                          <button className="flex-1 py-2 text-[10px] font-semibold rounded-lg" style={{ background: 'rgba(0,212,255,0.08)', color: '#00d4ff' }}>Stake More</button>
-                          <button className="flex-1 py-2 text-[10px] font-semibold rounded-lg" style={{ background: 'rgba(76,175,80,0.08)', color: '#4caf50' }}>Claim</button>
-                          <button className="flex-1 py-2 text-[10px] font-semibold rounded-lg" style={{ background: 'rgba(255,152,0,0.08)', color: '#ff9800' }}>Pause</button>
+
+                        {/* Action Buttons */}
+                        <div className="grid grid-cols-3 gap-2">
+                          <button className="btn-primary text-[10px]">Stake More</button>
+                          <button className="btn-success text-[10px]">Claim</button>
+                          <button className="btn-secondary text-[10px]">Pause</button>
                         </div>
                       </motion.div>
                     ))}
@@ -471,37 +658,53 @@ export default function DashboardPage() {
                 </motion.div>
               )}
 
+              {/* ═══════════════════════════════════════
+                  GOVERNANCE TAB — Proposal Cards
+              ═══════════════════════════════════════ */}
               {activeTab === 'governance' && (
                 <motion.div key="governance" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
-                  <h1 className="font-mono text-lg font-bold" style={{ color: '#ededed' }}>Governance</h1>
+                  <div>
+                    <h1 className="font-mono text-lg font-bold" style={{ color: '#ededed' }}>Governance</h1>
+                    <p className="text-xs mt-1" style={{ color: '#666' }}>{proposals.length} proposals · {proposals.filter(p => p.status === 'active').length} active</p>
+                  </div>
+
                   <div className="space-y-4">
                     {proposals.map((p) => {
                       const total = p.forVotes + p.againstVotes;
                       const forPct = total > 0 ? (p.forVotes / total) * 100 : 0;
                       return (
-                        <motion.div key={p.id} whileHover={{ y: -3 }} className="glass glass-hover p-6">
-                          <div className="flex items-start justify-between mb-3">
-                            <div>
-                              <h3 className="text-sm font-semibold mb-1" style={{ color: '#ededed' }}>{p.title}</h3>
-                              <div className="text-[10px]" style={{ color: '#555' }}>{p.id} · Deadline: {p.deadline}</div>
+                        <motion.div key={p.id} whileHover={{ y: -2 }} className="card">
+                          {/* Proposal Header */}
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="badge badge-active" style={{ fontSize: '9px', padding: '2px 8px' }}>{p.category}</span>
+                                <span className={`badge ${p.status === 'active' ? 'badge-active' : p.status === 'passed' ? 'badge-success' : 'badge-warning'}`}>
+                                  {p.status.toUpperCase()}
+                                </span>
+                              </div>
+                              <h3 className="text-sm font-semibold mt-2" style={{ color: '#ededed' }}>{p.title}</h3>
+                              <div className="text-[10px] mt-1" style={{ color: '#666' }}>{p.id} · Deadline: {p.deadline}</div>
                             </div>
-                            <span className="px-2.5 py-1 rounded-full text-[9px] font-mono" style={{
-                              background: p.status === 'active' ? 'rgba(0,212,255,0.1)' : p.status === 'passed' ? 'rgba(76,175,80,0.1)' : 'rgba(255,152,0,0.1)',
-                              color: p.status === 'active' ? '#00d4ff' : p.status === 'passed' ? '#4caf50' : '#ff9800',
-                            }}>{p.status.toUpperCase()}</span>
                           </div>
-                          <div className="h-2 rounded-full overflow-hidden flex mb-2" style={{ background: '#1a1a1a' }}>
-                            <motion.div className="h-full bg-green-500/60 rounded-l-full" initial={{ width: 0 }} animate={{ width: `${forPct}%` }} transition={{ duration: 0.8 }} />
-                            <motion.div className="h-full bg-red-500/40 rounded-r-full" initial={{ width: 0 }} animate={{ width: `${100 - forPct}%` }} transition={{ duration: 0.8 }} />
+
+                          {/* Progress Bar */}
+                          <div className="mb-3">
+                            <div className="flex justify-between text-[10px] mb-1.5">
+                              <span style={{ color: '#00ff80' }}>For: {p.forVotes.toLocaleString()} ({forPct.toFixed(0)}%)</span>
+                              <span style={{ color: '#ff4d4d' }}>Against: {p.againstVotes.toLocaleString()} ({(100-forPct).toFixed(0)}%)</span>
+                            </div>
+                            <div className="progress-bar">
+                              <motion.div className="bar-for" initial={{ width: 0 }} animate={{ width: `${forPct}%` }} transition={{ duration: 0.8 }} />
+                              <motion.div className="bar-against" initial={{ width: 0 }} animate={{ width: `${100 - forPct}%` }} transition={{ duration: 0.8 }} />
+                            </div>
                           </div>
-                          <div className="flex justify-between text-[10px]" style={{ color: '#555' }}>
-                            <span style={{ color: '#4caf50' }}>For: {p.forVotes.toLocaleString()} ({forPct.toFixed(0)}%)</span>
-                            <span style={{ color: '#f44336' }}>Against: {p.againstVotes.toLocaleString()} ({(100-forPct).toFixed(0)}%)</span>
-                          </div>
+
+                          {/* Actions */}
                           {p.status === 'active' && (
                             <div className="flex gap-3 mt-4">
-                              <button onClick={() => setVoteModal({ open: true, proposalId: p.id, proposalTitle: p.title, vote: 'for' })} className="flex-1 py-2.5 text-xs font-bold rounded-lg" style={{ background: 'rgba(76,175,80,0.1)', color: '#4caf50' }}>Vote For</button>
-                              <button onClick={() => setVoteModal({ open: true, proposalId: p.id, proposalTitle: p.title, vote: 'against' })} className="flex-1 py-2.5 text-xs font-bold rounded-lg" style={{ background: 'rgba(244,67,54,0.1)', color: '#f44336' }}>Vote Against</button>
+                              <button onClick={() => setVoteModal({ open: true, proposalId: p.id, proposalTitle: p.title, vote: 'for' })} className="btn-success flex-1">Vote For</button>
+                              <button onClick={() => setVoteModal({ open: true, proposalId: p.id, proposalTitle: p.title, vote: 'against' })} className="btn-danger flex-1">Vote Against</button>
                             </div>
                           )}
                         </motion.div>
@@ -511,33 +714,42 @@ export default function DashboardPage() {
                 </motion.div>
               )}
 
+              {/* ═══════════════════════════════════════
+                  STAKING TAB — Pool Cards
+              ═══════════════════════════════════════ */}
               {activeTab === 'staking' && (
                 <motion.div key="staking" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
-                  <h1 className="font-mono text-lg font-bold" style={{ color: '#ededed' }}>Staking</h1>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h1 className="font-mono text-lg font-bold" style={{ color: '#ededed' }}>Staking Pools</h1>
+                    <p className="text-xs mt-1" style={{ color: '#666' }}>{pools.length} pools available</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     {pools.map((pool) => (
-                      <motion.div key={pool.id} whileHover={{ y: -3 }} className="glass glass-hover p-6">
-                        <div className="flex items-center justify-between mb-4">
+                      <motion.div key={pool.id} whileHover={{ y: -3, borderColor: 'rgba(0,212,255,0.3)' }} className="card" style={{ transition: 'all 0.3s ease' }}>
+                        {/* Pool Header */}
+                        <div className="flex items-center justify-between mb-5">
                           <div>
                             <h3 className="font-mono text-sm font-bold" style={{ color: '#ededed' }}>{pool.name} Pool</h3>
-                            <div className="text-[10px] mt-0.5" style={{ color: '#555' }}>Min: {pool.minStake} ACHAIN</div>
+                            <div className="text-[10px] mt-0.5" style={{ color: '#666' }}>Min: {pool.minStake.toLocaleString()} ACHAIN</div>
                           </div>
-                          <div className="text-right">
-                            <div className="font-mono text-xl font-bold" style={{ color: '#00d4ff' }}>{pool.apy}%</div>
-                            <div className="text-[9px] uppercase tracking-wider" style={{ color: '#555' }}>APY</div>
+                          <div className="apy-badge">{pool.apy}% APY</div>
+                        </div>
+
+                        {/* Stats */}
+                        <div className="grid grid-cols-2 gap-3 mb-5">
+                          <div className="p-3 rounded-lg" style={{ background: '#1a1a1a', border: '1px solid #222' }}>
+                            <div className="stat-label mb-1">Total Staked</div>
+                            <div className="font-mono text-sm font-bold" style={{ color: '#ededed' }}>{(pool.totalStaked / 1000).toFixed(0)}K</div>
+                          </div>
+                          <div className="p-3 rounded-lg" style={{ background: '#1a1a1a', border: '1px solid #222' }}>
+                            <div className="stat-label mb-1">Your Stake</div>
+                            <div className="font-mono text-sm font-bold" style={{ color: '#b897ff' }}>{pool.userStaked.toLocaleString()}</div>
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-3 mb-4">
-                          <div className="p-3 rounded-lg" style={{ background: 'rgba(255,255,255,0.02)' }}>
-                            <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: '#555' }}>Total Staked</div>
-                            <div className="font-mono text-sm font-semibold" style={{ color: '#ededed' }}>{(pool.totalStaked / 1000).toFixed(0)}K</div>
-                          </div>
-                          <div className="p-3 rounded-lg" style={{ background: 'rgba(255,255,255,0.02)' }}>
-                            <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: '#555' }}>Your Stake</div>
-                            <div className="font-mono text-sm font-semibold" style={{ color: '#7c3aed' }}>{pool.userStaked.toLocaleString()}</div>
-                          </div>
-                        </div>
-                        <button onClick={() => setStakeModal({ open: true, poolId: pool.id, poolName: pool.name })} className="w-full py-2.5 text-xs font-bold font-mono rounded-lg glow-btn" style={{ background: '#00d4ff', color: '#0a0a0a' }}>
+
+                        {/* Action */}
+                        <button onClick={() => setStakeModal({ open: true, poolId: pool.id, poolName: pool.name })} className="btn-primary w-full glow-btn">
                           Stake ACHAIN
                         </button>
                       </motion.div>
@@ -554,28 +766,28 @@ export default function DashboardPage() {
       <Modal open={stakeModal.open} onClose={() => setStakeModal({ open: false })} title={`Stake in ${stakeModal.poolName || ''} Pool`}>
         <div className="space-y-4">
           <div>
-            <label className="text-xs font-mono uppercase tracking-wider block mb-2" style={{ color: '#555' }}>Amount (ACHAIN)</label>
+            <label className="stat-label block mb-2">Amount (ACHAIN)</label>
             <input
               type="number" value={stakeAmount} onChange={(e) => setStakeAmount(e.target.value)} placeholder="0.00"
               className="w-full px-4 py-3 rounded-xl text-sm font-mono focus:outline-none"
-              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#ededed' }}
+              style={{ background: '#1a1a1a', border: '1px solid #333', color: '#ededed' }}
             />
           </div>
           <div className="flex gap-3">
-            <button onClick={() => setStakeModal({ open: false })} className="flex-1 py-3 text-xs font-semibold rounded-xl" style={{ border: '1px solid rgba(255,255,255,0.08)', color: '#555' }}>Cancel</button>
-            <button onClick={handleStake} className="flex-1 py-3 text-xs font-bold font-mono rounded-xl glow-btn" style={{ background: '#00d4ff', color: '#0a0a0a' }}>Confirm Stake</button>
+            <button onClick={() => setStakeModal({ open: false })} className="btn-secondary flex-1">Cancel</button>
+            <button onClick={handleStake} className="btn-primary flex-1 glow-btn">Confirm Stake</button>
           </div>
         </div>
       </Modal>
 
       <Modal open={voteModal.open} onClose={() => setVoteModal({ open: false })} title="Confirm Vote">
         <div className="space-y-4">
-          <p className="text-sm" style={{ color: '#a3a3a3' }}>
-            Vote <strong style={{ color: voteModal.vote === 'for' ? '#4caf50' : '#f44336' }}>{voteModal.vote?.toUpperCase()}</strong> on "{voteModal.proposalTitle}"?
+          <p className="text-sm" style={{ color: '#888' }}>
+            Vote <strong style={{ color: voteModal.vote === 'for' ? '#00ff80' : '#ff4d4d' }}>{voteModal.vote?.toUpperCase()}</strong> on &quot;{voteModal.proposalTitle}&quot;?
           </p>
           <div className="flex gap-3">
-            <button onClick={() => setVoteModal({ open: false })} className="flex-1 py-3 text-xs font-semibold rounded-xl" style={{ border: '1px solid rgba(255,255,255,0.08)', color: '#555' }}>Cancel</button>
-            <button onClick={handleVote} className="flex-1 py-3 text-xs font-bold font-mono rounded-xl glow-btn" style={{ background: '#00d4ff', color: '#0a0a0a' }}>Confirm Vote</button>
+            <button onClick={() => setVoteModal({ open: false })} className="btn-secondary flex-1">Cancel</button>
+            <button onClick={handleVote} className="btn-primary flex-1 glow-btn">Confirm Vote</button>
           </div>
         </div>
       </Modal>

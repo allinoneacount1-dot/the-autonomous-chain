@@ -1,52 +1,41 @@
 'use client';
-
-import { motion } from 'framer-motion';
 import AnimatedSection from './AnimatedSection';
+import { IconLayers, IconCpu, IconZap, IconVote } from './Icons';
 
 const flow = [
-  { from: 'Worker Agents', to: 'Labor Fees', icon: '⬢' },
-  { from: 'Intelligence Agents', to: 'Insight Rewards', icon: '⟐' },
-  { from: 'Operator Agents', to: 'Staking Yield', icon: '⬡' },
-  { from: 'Genesis Agents', to: 'Governance Power', icon: '◎' },
+  { from: 'Worker Agents', to: 'Labor Fees', Icon: IconLayers },
+  { from: 'Intelligence Agents', to: 'Insight Rewards', Icon: IconCpu },
+  { from: 'Operator Agents', to: 'Staking Yield', Icon: IconZap },
+  { from: 'Genesis Agents', to: 'Governance Power', Icon: IconVote },
 ];
 
 export default function EconomySection() {
   return (
-    <section id="economy" className="section-pad">
-      <div className="container-max">
-        <AnimatedSection className="text-center mb-16">
-          <span className="font-mono text-xs tracking-[0.3em] uppercase text-accent mb-4 block">
+    <section id="economy" className="section">
+      <div className="container">
+        <AnimatedSection className="text-center mb-14">
+          <p className="font-mono text-xs tracking-[0.25em] uppercase mb-4" style={{ color: '#00d4ff' }}>
             // Economy
-          </span>
-          <h2 className="font-mono text-[clamp(1.8rem,4vw,3rem)] font-bold text-[#E8E8E8] mb-4">
+          </p>
+          <h2 className="font-mono text-[clamp(2rem,4vw,3rem)] font-bold mb-4" style={{ color: '#ededed' }}>
             Machine Economy
           </h2>
-          <p className="text-[#5A5A5A] max-w-lg mx-auto">
+          <p className="max-w-lg mx-auto" style={{ color: '#a3a3a3' }}>
             Every agent earns. Every contribution is valued. No human intermediary.
           </p>
         </AnimatedSection>
 
-        {/* Flow diagram — bukan daftar membosankan */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
           {flow.map((item, i) => (
-            <AnimatedSection key={item.from} delay={i * 0.1}>
-              <motion.div
-                whileHover={{ y: -4 }}
-                transition={{ type: 'spring', stiffness: 300 }}
-                className="glass glass-hover p-6 text-center h-full flex flex-col justify-center"
-              >
-                <div className="text-2xl text-accent mb-3">{item.icon}</div>
-                <div className="font-mono text-xs text-[#5A5A5A] mb-1">{item.from}</div>
-                <div className="text-[#3A3A3A] text-xs mb-2">↓</div>
-                <div className="font-mono text-sm font-bold text-accent">{item.to}</div>
-              </motion.div>
+            <AnimatedSection key={item.from} delay={i * 0.08}>
+              <div className="glass glass-hover p-6 text-center h-full flex flex-col justify-center">
+                <item.Icon className="mx-auto mb-3" size={22} style={{ color: '#00d4ff' }} />
+                <div className="font-mono text-xs mb-1" style={{ color: '#666666' }}>{item.from}</div>
+                <div className="my-2" style={{ color: '#333333' }}>↓</div>
+                <div className="font-mono text-sm font-bold" style={{ color: '#00d4ff' }}>{item.to}</div>
+              </div>
             </AnimatedSection>
           ))}
-        </div>
-
-        {/* Connection lines on desktop */}
-        <div className="hidden lg:block relative -mt-3 mx-12">
-          <div className="h-[1px] bg-gradient-to-r from-transparent via-[#0096FF]/10 to-transparent" />
         </div>
       </div>
     </section>

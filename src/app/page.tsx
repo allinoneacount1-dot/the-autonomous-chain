@@ -20,44 +20,28 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <main className="relative min-h-screen bg-[#0A0A0A] overflow-x-hidden">
+    <main className="relative min-h-screen overflow-x-hidden" style={{ background: '#0a0a0a' }}>
       <Scene3D />
       <Navbar />
 
       <div className="relative z-10">
         <HeroSection />
         <StatsSection />
-
         <div className="divider" />
-
         <GenesisSection />
-
         <div className="divider" />
-
         <ArchitectureSection />
-
         <div className="divider" />
-
         <AgentsSection />
-
         <div className="divider" />
-
         <EconomySection />
-
         <div className="divider" />
-
         <GovernanceSection />
-
         <div className="divider" />
-
         <RoadmapSection />
-
         <div className="divider" />
-
         <CommandCenter />
-
         <div className="divider" />
-
         <CTASection />
       </div>
     </main>

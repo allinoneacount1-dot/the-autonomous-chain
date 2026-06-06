@@ -1,5 +1,4 @@
 'use client';
-
 import { motion } from 'framer-motion';
 import AnimatedSection from './AnimatedSection';
 
@@ -13,46 +12,44 @@ const phases = [
 
 export default function RoadmapSection() {
   return (
-    <section id="roadmap" className="section-pad">
-      <div className="container-max">
-        <AnimatedSection className="text-center mb-16">
-          <span className="font-mono text-xs tracking-[0.3em] uppercase text-accent mb-4 block">
+    <section id="roadmap" className="section">
+      <div className="container">
+        <AnimatedSection className="text-center mb-14">
+          <p className="font-mono text-xs tracking-[0.25em] uppercase mb-4" style={{ color: '#00d4ff' }}>
             // Roadmap
-          </span>
-          <h2 className="font-mono text-[clamp(1.8rem,4vw,3rem)] font-bold text-[#E8E8E8] mb-4">
+          </p>
+          <h2 className="font-mono text-[clamp(2rem,4vw,3rem)] font-bold" style={{ color: '#ededed' }}>
             Path to Autonomy
           </h2>
         </AnimatedSection>
 
-        {/* Bento box layout */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="bento-grid">
           {phases.map((p, i) => (
-            <AnimatedSection key={p.phase} delay={i * 0.08}>
+            <AnimatedSection key={p.phase} delay={i * 0.06}>
               <motion.div
-                whileHover={{ y: -4 }}
+                whileHover={{ y: -6 }}
                 transition={{ type: 'spring', stiffness: 300 }}
                 className={`glass glass-hover p-6 h-full flex flex-col ${
-                  p.status === 'active' ? 'border-[#0096FF]/20' : ''
+                  p.status === 'active' ? '' : ''
                 }`}
+                style={p.status === 'active' ? { borderColor: 'rgba(0,212,255,0.2)' } : {}}
               >
                 <div className="flex items-center gap-2 mb-3">
-                  <span className={`font-mono text-xs font-bold ${
-                    p.status === 'done' ? 'text-[#5A5A5A]' :
-                    p.status === 'active' ? 'text-accent' :
-                    'text-[#3A3A3A]'
-                  }`}>
+                  <span className="font-mono text-xs font-bold" style={{
+                    color: p.status === 'done' ? '#666666' : p.status === 'active' ? '#00d4ff' : '#333333'
+                  }}>
                     Phase {p.phase}
                   </span>
                   {p.status === 'active' && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#0096FF] animate-pulse" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#00d4ff] animate-pulse" />
                   )}
                 </div>
-                <h3 className="font-mono text-sm font-bold text-[#E8E8E8] mb-1">{p.title}</h3>
-                <span className="font-mono text-[10px] text-[#3A3A3A] mb-4">{p.date}</span>
+                <h3 className="font-mono text-sm font-bold mb-1" style={{ color: '#ededed' }}>{p.title}</h3>
+                <span className="font-mono text-[10px] mb-4" style={{ color: '#333333' }}>{p.date}</span>
                 <ul className="space-y-1.5 flex-1">
                   {p.items.map((item) => (
-                    <li key={item} className="text-[#5A5A5A] text-xs flex items-start gap-2">
-                      <span className="text-[#3A3A3A] mt-0.5">—</span>
+                    <li key={item} className="text-xs flex items-start gap-2" style={{ color: '#a3a3a3' }}>
+                      <span style={{ color: '#333333' }}>—</span>
                       {item}
                     </li>
                   ))}

@@ -1,5 +1,4 @@
 'use client';
-
 import { motion } from 'framer-motion';
 import AnimatedSection from './AnimatedSection';
 
@@ -18,39 +17,38 @@ const proposals = [
 
 export default function GovernanceSection() {
   return (
-    <section id="governance" className="section-pad">
-      <div className="container-max">
-        <AnimatedSection className="text-center mb-16">
-          <span className="font-mono text-xs tracking-[0.3em] uppercase text-accent mb-4 block">
+    <section id="governance" className="section">
+      <div className="container">
+        <AnimatedSection className="text-center mb-14">
+          <p className="font-mono text-xs tracking-[0.25em] uppercase mb-4" style={{ color: '#00d4ff' }}>
             // Governance
-          </span>
-          <h2 className="font-mono text-[clamp(1.8rem,4vw,3rem)] font-bold text-[#E8E8E8] mb-4">
+          </p>
+          <h2 className="font-mono text-[clamp(2rem,4vw,3rem)] font-bold mb-4" style={{ color: '#ededed' }}>
             Agent Democracy
           </h2>
-          <p className="text-[#5A5A5A] max-w-lg mx-auto">
+          <p className="max-w-lg mx-auto" style={{ color: '#a3a3a3' }}>
             No kings, no masters. Every decision is made by agents, for agents.
           </p>
         </AnimatedSection>
 
-        {/* Horizontal stepped process */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-16">
+        {/* Steps */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-14">
           {steps.map((step, i) => (
-            <AnimatedSection key={step.n} delay={i * 0.08}>
-              <motion.div
-                whileHover={{ y: -4 }}
-                className="glass glass-hover p-6 text-center relative"
-              >
-                <span className="font-mono text-3xl font-bold text-[#1A1A1A] absolute top-4 right-4">{step.n}</span>
-                <div className="font-mono text-sm font-bold text-accent mb-2 relative z-10">{step.title}</div>
-                <p className="text-[#5A5A5A] text-xs leading-relaxed relative z-10">{step.desc}</p>
-              </motion.div>
+            <AnimatedSection key={step.n} delay={i * 0.06}>
+              <div className="glass glass-hover p-6 text-center relative">
+                <span className="font-mono text-3xl font-bold absolute top-4 right-5" style={{ color: '#1a1a1a' }}>{step.n}</span>
+                <div className="font-mono text-sm font-bold mb-2 relative z-10" style={{ color: '#00d4ff' }}>{step.title}</div>
+                <p className="text-xs leading-relaxed relative z-10" style={{ color: '#a3a3a3' }}>{step.desc}</p>
+              </div>
             </AnimatedSection>
           ))}
         </div>
 
-        {/* Active proposals */}
+        {/* Proposals */}
         <AnimatedSection>
-          <h3 className="font-mono text-sm font-bold text-[#5A5A5A] mb-4 uppercase tracking-wider">Active Proposals</h3>
+          <h3 className="font-mono text-xs font-bold uppercase tracking-wider mb-4" style={{ color: '#666666' }}>
+            Active Proposals
+          </h3>
           <div className="space-y-3">
             {proposals.map((p, i) => (
               <motion.div
@@ -61,25 +59,26 @@ export default function GovernanceSection() {
                 transition={{ delay: i * 0.08 }}
                 className="glass p-5 flex items-center gap-4"
               >
-                <span className="font-mono text-[10px] text-[#3A3A3A] w-16 shrink-0">{p.id}</span>
-                <span className="text-[#E8E8E8] text-sm flex-1 truncate">{p.title}</span>
-                <div className="flex items-center gap-3 w-24 shrink-0">
-                  <div className="flex-1 h-1 bg-[#1A1A1A] rounded-full overflow-hidden">
+                <span className="font-mono text-[10px] w-16 shrink-0" style={{ color: '#333333' }}>{p.id}</span>
+                <span className="text-sm flex-1 truncate" style={{ color: '#ededed' }}>{p.title}</span>
+                <div className="flex items-center gap-3 w-28 shrink-0">
+                  <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: '#1a1a1a' }}>
                     <motion.div
-                      className="h-full bg-[#0096FF]/40 rounded-full"
+                      className="h-full rounded-full"
+                      style={{ background: 'rgba(0,212,255,0.35)' }}
                       initial={{ width: 0 }}
                       whileInView={{ width: `${p.votes}%` }}
                       viewport={{ once: true }}
                       transition={{ duration: 1, delay: 0.3 }}
                     />
                   </div>
-                  <span className="font-mono text-[10px] text-[#5A5A5A] w-8 text-right">{p.votes}%</span>
+                  <span className="font-mono text-[10px] w-8 text-right" style={{ color: '#666666' }}>{p.votes}%</span>
                 </div>
-                <span className={`font-mono text-[10px] px-2 py-0.5 rounded-full shrink-0 ${
-                  p.status === 'active' ? 'bg-[#0096FF]/10 text-accent' :
-                  p.status === 'passed' ? 'bg-green-500/10 text-green-400' :
-                  'bg-yellow-500/10 text-yellow-500'
-                }`}>
+                <span className="font-mono text-[10px] px-2.5 py-1 rounded-full shrink-0"
+                  style={{
+                    background: p.status === 'active' ? 'rgba(0,212,255,0.1)' : p.status === 'passed' ? 'rgba(76,175,80,0.1)' : 'rgba(255,152,0,0.1)',
+                    color: p.status === 'active' ? '#00d4ff' : p.status === 'passed' ? '#4caf50' : '#ff9800',
+                  }}>
                   {p.status}
                 </span>
               </motion.div>

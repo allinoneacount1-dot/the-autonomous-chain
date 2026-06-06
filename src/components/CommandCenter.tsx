@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import AnimatedSection from './AnimatedSection';
@@ -11,8 +10,6 @@ const logs = [
   { time: '14:30:58', msg: 'Staking pool Operator reached 1.2M ACHAIN', type: 'success' },
   { time: '14:30:33', msg: 'Governance vote cast: PROP-001 +100 FOR', type: 'info' },
   { time: '14:30:01', msg: 'Block #1,247,892 finalized — 0.8s', type: 'success' },
-  { time: '14:29:44', msg: 'Agent OPT-0107 claimed rewards: 42 ACHAIN', type: 'info' },
-  { time: '14:29:12', msg: 'ZK identity proof verified: GEN-002', type: 'success' },
 ];
 
 export default function CommandCenter() {
@@ -29,17 +26,17 @@ export default function CommandCenter() {
   }, []);
 
   return (
-    <section className="section-pad pt-0">
-      <div className="container-max">
+    <section className="py-16 px-32">
+      <div className="container">
         <AnimatedSection>
           <div className="terminal">
-            <div className="terminal-header">
-              <div className="terminal-dot bg-red-500/60" />
-              <div className="terminal-dot bg-yellow-500/60" />
-              <div className="terminal-dot bg-green-500/60" />
-              <span className="text-[#3A3A3A] text-xs ml-2">autonomous-chain — live feed</span>
+            <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+              <div className="w-2.5 h-2.5 rounded-full" style={{ background: 'rgba(255,82,82,0.5)' }} />
+              <div className="w-2.5 h-2.5 rounded-full" style={{ background: 'rgba(255,188,0,0.5)' }} />
+              <div className="w-2.5 h-2.5 rounded-full" style={{ background: 'rgba(76,175,80,0.5)' }} />
+              <span className="text-[10px] ml-2" style={{ color: '#333333' }}>autonomous-chain — live feed</span>
             </div>
-            <div className="terminal-body">
+            <div className="px-4 py-3">
               {visibleLogs.map((log, i) => (
                 <motion.div
                   key={`${log.time}-${i}`}
@@ -48,21 +45,19 @@ export default function CommandCenter() {
                   transition={{ duration: 0.3 }}
                   className="flex gap-3"
                 >
-                  <span className="text-[#3A3A3A] shrink-0">{log.time}</span>
-                  <span className={log.type === 'success' ? 'text-green-400/70' : 'text-[#5A5A5A]'}>
+                  <span className="shrink-0" style={{ color: '#333333' }}>{log.time}</span>
+                  <span style={{ color: log.type === 'success' ? 'rgba(76,175,80,0.6)' : '#666666' }}>
                     {log.msg}
                   </span>
                 </motion.div>
               ))}
               <div className="flex gap-1 mt-1">
-                <span className="text-[#0096FF]">❯</span>
+                <span style={{ color: '#00d4ff' }}>❯</span>
                 <motion.span
                   animate={{ opacity: [1, 0, 1] }}
                   transition={{ duration: 1, repeat: Infinity }}
-                  className="text-[#3A3A3A]"
-                >
-                  _
-                </motion.span>
+                  style={{ color: '#333333' }}
+                >_</motion.span>
               </div>
             </div>
           </div>

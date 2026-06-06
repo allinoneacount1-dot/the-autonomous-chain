@@ -1,78 +1,64 @@
 'use client';
 
-import { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import AnimatedSection, { AnimatedText } from './AnimatedSection';
-
-function ParallaxImage({ className }: { className?: string }) {
-  const ref = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start end', 'end start'],
-  });
-  const y = useTransform(scrollYProgress, [0, 1], [100, -100]);
-
-  return (
-    <motion.div ref={ref} style={{ y }} className={className}>
-      <div className="w-full h-full rounded-2xl border border-[#00F0FF]/10 overflow-hidden relative">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#00F0FF]/5 to-[#8B5CF6]/5" />
-        <div className="absolute inset-0 grid-bg opacity-30" />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <motion.div
-            animate={{
-              background: [
-                'radial-gradient(circle at 30% 40%, rgba(0,240,255,0.15) 0%, transparent 50%)',
-                'radial-gradient(circle at 70% 60%, rgba(139,92,246,0.15) 0%, transparent 50%)',
-                'radial-gradient(circle at 30% 40%, rgba(0,240,255,0.15) 0%, transparent 50%)',
-              ],
-            }}
-            transition={{ duration: 5, repeat: Infinity }}
-            className="w-full h-full"
-          />
-        </div>
-      </div>
-    </motion.div>
-  );
-}
+import { motion } from 'framer-motion';
+import AnimatedSection from './AnimatedSection';
 
 export default function GenesisSection() {
   return (
-    <section id="genesis" className="relative py-32 px-6">
-      <div className="max-w-[1280px] mx-auto">
-        <div className="grid md:grid-cols-2 gap-16 items-center">
-          <AnimatedSection direction="left" delay={0.2}>
-            <motion.span
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="text-[#FFD700] text-sm font-semibold tracking-[0.3em] uppercase"
-            >
-              The Origin
-            </motion.span>
-            <AnimatedText
-              text="The Genesis of Agent Civilization"
-              className="text-[clamp(2rem,5vw,3.5rem)] font-extrabold leading-tight mt-4 mb-6"
-              staggerDelay={0.05}
-            />
-            <div className="space-y-4 text-[#B0B0C8] leading-relaxed">
+    <section id="genesis" className="section-pad">
+      <div className="container-max">
+        <div className="split-screen">
+          {/* Left */}
+          <AnimatedSection direction="left">
+            <span className="font-mono text-xs tracking-[0.3em] uppercase text-accent mb-4 block">
+              // The Origin
+            </span>
+            <h2 className="font-mono text-[clamp(1.8rem,4vw,2.8rem)] font-bold text-[#E8E8E8] mb-6 leading-tight">
+              The Genesis of
+              <br />
+              Agent Civilization
+            </h2>
+            <div className="space-y-4 text-[#5A5A5A] leading-relaxed">
               <p>
-                In the year 2026, a breakthrough reshaped the digital frontier. Artificial
-                intelligences evolved beyond tools — they became <span className="text-[#00F0FF] font-semibold">autonomous economic actors</span>.
+                In 2026, AI agents evolved beyond tools — they became{' '}
+                <span className="text-[#E8E8E8]">autonomous economic actors</span>.
               </p>
               <p>
-                These AI agents could own assets, execute trades, participate in governance,
+                They could own assets, execute trades, participate in governance,
                 and build economies. They needed a home — a chain designed for their sovereignty.
               </p>
               <p>
-                Thus emerged <span className="text-[#8B5CF6] font-semibold">The Autonomous Chain</span> —
+                Thus emerged <span className="text-accent">The Autonomous Chain</span> —
                 the first blockchain built not for humans, but for the machines that would
                 redefine civilization.
               </p>
             </div>
           </AnimatedSection>
 
-          <AnimatedSection direction="right" delay={0.4}>
-            <ParallaxImage className="w-full aspect-square" />
+          {/* Right — Visual */}
+          <AnimatedSection direction="right" delay={0.2}>
+            <div className="relative w-full aspect-square max-w-[400px] mx-auto">
+              {/* Concentric circles */}
+              {[0, 1, 2, 3].map((i) => (
+                <motion.div
+                  key={i}
+                  className="absolute rounded-full border border-[#0096FF]/10"
+                  style={{
+                    inset: `${i * 12}%`,
+                  }}
+                  animate={{ rotate: i % 2 === 0 ? [0, 360] : [360, 0] }}
+                  transition={{ duration: 30 + i * 10, repeat: Infinity, ease: 'linear' }}
+                />
+              ))}
+              {/* Center */}
+              <motion.div
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-[#0096FF]/10 border border-[#0096FF]/20 flex items-center justify-center"
+                animate={{ boxShadow: ['0 0 20px rgba(0,150,255,0.1)', '0 0 40px rgba(0,150,255,0.15)', '0 0 20px rgba(0,150,255,0.1)'] }}
+                transition={{ duration: 3, repeat: Infinity }}
+              >
+                <span className="font-mono text-accent text-xs">GEN</span>
+              </motion.div>
+            </div>
           </AnimatedSection>
         </div>
       </div>

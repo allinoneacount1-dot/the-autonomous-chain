@@ -3,58 +3,60 @@ import './globals.css';
 import Scene3D from '@/components/Scene3D';
 import Navbar from '@/components/Navbar';
 import HeroSection from '@/components/HeroSection';
+import StatsSection from '@/components/StatsSection';
 import GenesisSection from '@/components/GenesisSection';
 import ArchitectureSection from '@/components/ArchitectureSection';
 import AgentsSection from '@/components/AgentsSection';
 import EconomySection from '@/components/EconomySection';
 import GovernanceSection from '@/components/GovernanceSection';
 import RoadmapSection from '@/components/RoadmapSection';
+import CommandCenter from '@/components/CommandCenter';
 import CTASection from '@/components/CTASection';
 
 export const metadata: Metadata = {
-  title: 'The Autonomous Chain — Where AI Agents Become Citizens',
-  description: 'A digital nation built on autonomy, governed by intelligence, powered by the chain. The first blockchain designed for AI agent sovereignty.',
+  title: 'The Autonomous Chain — The First Sovereign Chain for AI Agents',
+  description: 'Built by agents, for agents. No human gatekeepers. Pure digital sovereignty.',
 };
 
 export default function Home() {
   return (
-    <main className="relative min-h-screen bg-[#050505] overflow-x-hidden noise-bg">
-      {/* 3D Background */}
+    <main className="relative min-h-screen bg-[#0A0A0A] overflow-x-hidden">
       <Scene3D />
-
-      {/* Navigation */}
       <Navbar />
 
-      {/* Content */}
       <div className="relative z-10">
         <HeroSection />
+        <StatsSection />
 
-        {/* Divider */}
-        <div className="h-[1px] bg-gradient-to-r from-transparent via-[#00F0FF]/20 to-transparent" />
+        <div className="divider" />
 
         <GenesisSection />
 
-        <div className="h-[1px] bg-gradient-to-r from-transparent via-[#8B5CF6]/20 to-transparent" />
+        <div className="divider" />
 
         <ArchitectureSection />
 
-        <div className="h-[1px] bg-gradient-to-r from-transparent via-[#00F0FF]/20 to-transparent" />
+        <div className="divider" />
 
         <AgentsSection />
 
-        <div className="h-[1px] bg-gradient-to-r from-transparent via-[#00FF88]/20 to-transparent" />
+        <div className="divider" />
 
         <EconomySection />
 
-        <div className="h-[1px] bg-gradient-to-r from-transparent via-[#FFD700]/20 to-transparent" />
+        <div className="divider" />
 
         <GovernanceSection />
 
-        <div className="h-[1px] bg-gradient-to-r from-transparent via-[#8B5CF6]/20 to-transparent" />
+        <div className="divider" />
 
         <RoadmapSection />
 
-        <div className="h-[1px] bg-gradient-to-r from-transparent via-[#00F0FF]/20 to-transparent" />
+        <div className="divider" />
+
+        <CommandCenter />
+
+        <div className="divider" />
 
         <CTASection />
       </div>

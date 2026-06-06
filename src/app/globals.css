@@ -1,22 +1,29 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --void: #050505;
-  --deep: #0A0A0F;
-  --matter: #111118;
-  --cyan: #00F0FF;
-  --violet: #8B5CF6;
-  --gold: #FFD700;
-  --ghost: #E8E8F0;
-  --starlight: #B0B0C8;
-  --nebula: #6B6B80;
-  --green: #00FF88;
-  --orange: #FF8C00;
-  --red: #FF3366;
+  /* ── Latar: Deep charcoal, bukan hitam pekat ── */
+  --bg-primary: #0A0A0A;
+  --bg-secondary: #121212;
+  --bg-tertiary: #1A1A1A;
+  --bg-card: rgba(255, 255, 255, 0.03);
+
+  /* ── Teks: Off-white, bukan putih murni ── */
+  --text-primary: #E8E8E8;
+  --text-secondary: #A0A0A0;
+  --text-muted: #5A5A5A;
+
+  /* ── SATU aksen saja: Electric Blue ── */
+  --accent: #0096FF;
+  --accent-dim: rgba(0, 150, 255, 0.15);
+  --accent-glow: rgba(0, 150, 255, 0.3);
+
+  /* ── Font families ── */
+  --font-mono: 'Space Mono', monospace;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 * {
@@ -31,104 +38,160 @@ html {
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background-color: var(--void);
-  color: var(--ghost);
+  font-family: var(--font-sans);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   overflow-x: hidden;
-  cursor: default;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: var(--void);
-}
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, var(--cyan), var(--violet));
-  border-radius: 3px;
-}
+/* ── Scrollbar minimal ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
 
-/* Selection */
 ::selection {
-  background: rgba(0, 240, 255, 0.3);
-  color: var(--ghost);
+  background: var(--accent-dim);
+  color: var(--text-primary);
 }
 
-/* Gradient text utility */
-.gradient-text {
-  background: linear-gradient(135deg, var(--cyan), var(--violet), var(--gold));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+/* ── Font classes ── */
+.font-mono { font-family: var(--font-mono); }
+.font-sans { font-family: var(--font-sans); }
+
+/* ── Glassmorphism card ── */
+.glass {
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
 }
 
-.gradient-text-cyan {
-  background: linear-gradient(135deg, var(--cyan), var(--violet));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.glass-hover {
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.glass-hover:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent-dim);
+  box-shadow: 0 8px 32px rgba(0, 150, 255, 0.08);
 }
 
-/* Glow effects */
-.glow-cyan {
-  box-shadow: 0 0 20px rgba(0, 240, 255, 0.3), 0 0 60px rgba(0, 240, 255, 0.1);
+/* ── Accent text ── */
+.text-accent { color: var(--accent); }
+.bg-accent { background-color: var(--accent); }
+.border-accent { border-color: var(--accent-dim); }
+
+/* ── Glow tipis untuk CTA ── */
+.glow-btn {
+  box-shadow: 0 0 0 0 var(--accent-glow);
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+.glow-btn:hover {
+  box-shadow: 0 0 24px 2px var(--accent-glow);
+  transform: translateY(-2px);
 }
 
-.glow-violet {
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3), 0 0 60px rgba(139, 92, 246, 0.1);
-}
-
-/* Noise texture overlay */
-.noise-bg::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 9999;
-  opacity: 0.4;
-}
-
-/* Animated gradient border */
-@keyframes borderGlow {
-  0%, 100% { border-color: rgba(0, 240, 255, 0.3); }
-  50% { border-color: rgba(139, 92, 246, 0.5); }
-}
-
-.animated-border {
-  border: 1px solid rgba(0, 240, 255, 0.2);
-  animation: borderGlow 3s ease-in-out infinite;
-}
-
-/* Pulse glow */
-@keyframes pulseGlow {
-  0%, 100% { box-shadow: 0 0 20px rgba(0, 240, 255, 0.2); }
-  50% { box-shadow: 0 0 40px rgba(0, 240, 255, 0.4), 0 0 80px rgba(139, 92, 246, 0.2); }
-}
-
-.pulse-glow {
-  animation: pulseGlow 2s ease-in-out infinite;
-}
-
-/* Float animation */
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-}
-
-.float {
-  animation: float 3s ease-in-out infinite;
-}
-
-/* Grid background */
+/* ── Grid background sangat halus ── */
 .grid-bg {
   background-image:
-    linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
-  background-size: 60px 60px;
+    linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+  background-size: 80px 80px;
+}
+
+/* ── Bento grid ── */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+@media (min-width: 1024px) {
+  .bento-grid-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .bento-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .bento-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ── Split screen ── */
+.split-screen {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 60px;
+  align-items: center;
+}
+
+@media (min-width: 1024px) {
+  .split-screen {
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+  }
+}
+
+/* ── Section spacing ── */
+.section-pad {
+  padding: 120px 24px;
+}
+
+@media (min-width: 768px) {
+  .section-pad {
+    padding: 160px 48px;
+  }
+}
+
+/* ── Container ── */
+.container-max {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ── Divider ── */
+.divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.06), transparent);
+}
+
+/* ── Terminal / Command Center ── */
+.terminal {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.terminal-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  gap: 8px;
+}
+
+.terminal-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.terminal-body {
+  padding: 16px;
+  max-height: 200px;
+  overflow: hidden;
+}
+
+/* ── Blur dot untuk hero ── */
+.blur-dot {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.12;
+  pointer-events: none;
 }

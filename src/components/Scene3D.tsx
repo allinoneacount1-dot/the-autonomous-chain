@@ -4,17 +4,17 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { useRef, useMemo } from 'react';
 import * as THREE from 'three';
 
-function NeuralParticles() {
+function SubtleParticles() {
   const meshRef = useRef<THREE.InstancedMesh>(null);
-  const count = 2000;
+  const count = 800;
 
   const particles = useMemo(() => {
     const temp = [];
     for (let i = 0; i < count; i++) {
-      const x = (Math.random() - 0.5) * 40;
-      const y = (Math.random() - 0.5) * 40;
-      const z = (Math.random() - 0.5) * 40;
-      const speed = 0.002 + Math.random() * 0.003;
+      const x = (Math.random() - 0.5) * 50;
+      const y = (Math.random() - 0.5) * 50;
+      const z = (Math.random() - 0.5) * 30;
+      const speed = 0.001 + Math.random() * 0.002;
       const offset = Math.random() * Math.PI * 2;
       temp.push({ x, y, z, speed, offset });
     }
@@ -22,24 +22,6 @@ function NeuralParticles() {
   }, []);
 
   const dummy = useMemo(() => new THREE.Object3D(), []);
-  const colorArray = useMemo(() => {
-    const colors = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      const t = Math.random();
-      if (t < 0.5) {
-        // Cyan: 0, 240, 255
-        colors[i * 3] = 0;
-        colors[i * 3 + 1] = 0.94;
-        colors[i * 3 + 2] = 1;
-      } else {
-        // Violet: 139, 92, 246
-        colors[i * 3] = 0.55;
-        colors[i * 3 + 1] = 0.36;
-        colors[i * 3 + 2] = 0.96;
-      }
-    }
-    return colors;
-  }, []);
 
   useFrame(({ clock }) => {
     if (!meshRef.current) return;
@@ -48,11 +30,11 @@ function NeuralParticles() {
     for (let i = 0; i < count; i++) {
       const p = particles[i];
       dummy.position.set(
-        p.x + Math.sin(time * p.speed * 10 + p.offset) * 0.5,
-        p.y + Math.cos(time * p.speed * 8 + p.offset) * 0.5,
-        p.z + Math.sin(time * p.speed * 6 + p.offset) * 0.3
+        p.x + Math.sin(time * p.speed * 5 + p.offset) * 0.3,
+        p.y + Math.cos(time * p.speed * 4 + p.offset) * 0.3,
+        p.z + Math.sin(time * p.speed * 3 + p.offset) * 0.2
       );
-      const scale = 0.02 + Math.sin(time + p.offset) * 0.01;
+      const scale = 0.008 + Math.sin(time * 0.5 + p.offset) * 0.004;
       dummy.scale.set(scale, scale, scale);
       dummy.updateMatrix();
       meshRef.current.setMatrixAt(i, dummy.matrix);
@@ -62,71 +44,58 @@ function NeuralParticles() {
 
   return (
     <instancedMesh ref={meshRef} args={[undefined, undefined, count]}>
-      <sphereGeometry args={[1, 8, 8]} />
-      <meshBasicMaterial toneMapped={false} transparent opacity={0.6} />
-      <instancedBufferAttribute attach="geometry-attributes-color" args={[colorArray, 3]} />
+      <sphereGeometry args={[1, 6, 6]} />
+      <meshBasicMaterial color="#0096FF" transparent opacity={0.25} toneMapped={false} />
     </instancedMesh>
   );
 }
 
-function ChainRings() {
+function NetworkLines() {
   const groupRef = useRef<THREE.Group>(null);
+
+  const dots = useMemo(() => {
+    const temp = [];
+    for (let i = 0; i < 40; i++) {
+      temp.push({
+        position: new THREE.Vector3(
+          (Math.random() - 0.5) * 30,
+          (Math.random() - 0.5) * 30,
+          (Math.random() - 0.5) * 15
+        ),
+      });
+    }
+    return temp;
+  }, []);
 
   useFrame(({ clock }) => {
     if (!groupRef.current) return;
-    const time = clock.getElapsedTime();
-    groupRef.current.rotation.x = time * 0.05;
-    groupRef.current.rotation.y = time * 0.08;
+    groupRef.current.rotation.y = clock.getElapsedTime() * 0.008;
   });
 
   return (
     <group ref={groupRef}>
-      {[0, 1, 2].map((i) => (
-        <mesh key={i} rotation={[i * Math.PI / 3, i * Math.PI / 4, 0]}>
-          <torusGeometry args={[3 + i * 0.5, 0.02, 16, 100]} />
-          <meshBasicMaterial
-            color={i % 2 === 0 ? '#00F0FF' : '#8B5CF6'}
-            transparent
-            opacity={0.4 - i * 0.1}
-          />
+      {dots.map((dot, i) => (
+        <mesh key={i} position={dot.position}>
+          <sphereGeometry args={[0.03, 6, 6]} />
+          <meshBasicMaterial color="#0096FF" transparent opacity={0.15} />
         </mesh>
       ))}
     </group>
   );
 }
 
-function WireframeIcosahedron() {
-  const meshRef = useRef<THREE.Mesh>(null);
-
-  useFrame(({ clock }) => {
-    if (!meshRef.current) return;
-    const time = clock.getElapsedTime();
-    meshRef.current.rotation.x = time * 0.03;
-    meshRef.current.rotation.y = time * 0.05;
-  });
-
-  return (
-    <mesh ref={meshRef}>
-      <icosahedronGeometry args={[2.5, 1]} />
-      <meshBasicMaterial color="#00F0FF" wireframe transparent opacity={0.15} />
-    </mesh>
-  );
-}
-
 export default function Scene3D() {
   return (
-    <div className="fixed inset-0 z-0">
+    <div className="fixed inset-0 z-0 pointer-events-none">
       <Canvas
-        camera={{ position: [0, 0, 10], fov: 60 }}
+        camera={{ position: [0, 0, 12], fov: 50 }}
         gl={{ antialias: true, alpha: true }}
         style={{ background: 'transparent' }}
+        dpr={[1, 1.5]}
       >
-        <ambientLight intensity={0.5} />
-        <pointLight position={[10, 10, 10]} intensity={1} color="#00F0FF" />
-        <pointLight position={[-10, -10, -10]} intensity={0.5} color="#8B5CF6" />
-        <NeuralParticles />
-        <ChainRings />
-        <WireframeIcosahedron />
+        <ambientLight intensity={0.3} />
+        <SubtleParticles />
+        <NetworkLines />
       </Canvas>
     </div>
   );

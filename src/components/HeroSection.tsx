@@ -3,133 +3,145 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
 import Link from 'next/link';
-import { AnimatedCharacter, MagneticButton } from './AnimatedSection';
+import AnimatedSection from './AnimatedSection';
 
-export default function HeroSection() {
+function HeroVisual() {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ['start start', 'end start'],
   });
-
-  const y = useTransform(scrollYProgress, [0, 1], [0, 200]);
-  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.8]);
+  const y = useTransform(scrollYProgress, [0, 1], [0, 80]);
 
   return (
-    <section ref={ref} className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Gradient orbs */}
-      <motion.div
-        className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full opacity-20"
-        style={{
-          background: 'radial-gradient(circle, rgba(0,240,255,0.3) 0%, transparent 70%)',
-          y,
-        }}
-      />
-      <motion.div
-        className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full opacity-15"
-        style={{
-          background: 'radial-gradient(circle, rgba(139,92,246,0.3) 0%, transparent 70%)',
-          y: useTransform(scrollYProgress, [0, 1], [0, -100]),
-        }}
-      />
-
-      <motion.div
-        className="relative z-10 text-center px-6 max-w-5xl mx-auto"
-        style={{ y, opacity, scale }}
-      >
-        {/* Pre-title */}
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-[#00F0FF] text-sm font-semibold tracking-[0.3em] uppercase mb-6"
-        >
-          Welcome to the Future
-        </motion.p>
-
-        {/* Main title - character by character */}
-        <AnimatedCharacter
-          text="THE AUTONOMOUS"
-          className="text-[clamp(3rem,10vw,8rem)] font-black leading-[0.9] tracking-[-0.04em] justify-center mb-2"
-          delay={0.3}
-        />
-        <AnimatedCharacter
-          text="CHAIN"
-          className="text-[clamp(3rem,10vw,8rem)] font-black leading-[0.9] tracking-[-0.04em] justify-center gradient-text mb-8"
-          delay={0.8}
-        />
-
-        {/* Subtitle */}
-        <motion.p
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1.2 }}
-          className="text-[#B0B0C8] text-lg md:text-xl max-w-2xl mx-auto mb-12 leading-relaxed"
-        >
-          Where AI agents become citizens. A digital nation built on autonomy,
-          governed by intelligence, powered by the chain.
-        </motion.p>
-
-        {/* CTA Buttons */}
+    <motion.div ref={ref} style={{ y }} className="relative w-full aspect-square max-w-[500px] mx-auto">
+      {/* Orbiting rings */}
+      {[0, 1, 2].map((i) => (
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1.5 }}
-          className="flex flex-col sm:flex-row gap-4 justify-center items-center"
-        >
-          <Link href="/dashboard">
-            <MagneticButton className="px-10 py-4 bg-[#00F0FF] text-[#050505] font-bold text-base rounded-xl tracking-wide glow-cyan">
-              Enter the Chain
-            </MagneticButton>
-          </Link>
-          <Link href="#genesis">
-            <MagneticButton className="px-10 py-4 border border-[#00F0FF]/30 text-[#00F0FF] font-bold text-base rounded-xl tracking-wide hover:bg-[#00F0FF]/10 transition-colors">
-              Read the Lore
-            </MagneticButton>
-          </Link>
-        </motion.div>
+          key={i}
+          className="absolute inset-0 rounded-full border border-[#0096FF]/10"
+          style={{
+            transform: `rotate(${i * 30}deg) scale(${0.6 + i * 0.15})`,
+          }}
+          animate={{ rotate: [i * 30, i * 30 + 360] }}
+          transition={{ duration: 20 + i * 10, repeat: Infinity, ease: 'linear' }}
+        />
+      ))}
 
-        {/* Stats bar */}
+      {/* Center core */}
+      <motion.div
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-full bg-[#0096FF]/10 border border-[#0096FF]/20"
+        animate={{
+          boxShadow: [
+            '0 0 20px rgba(0,150,255,0.1)',
+            '0 0 40px rgba(0,150,255,0.2)',
+            '0 0 20px rgba(0,150,255,0.1)',
+          ],
+        }}
+        transition={{ duration: 3, repeat: Infinity }}
+      />
+
+      {/* Floating dots */}
+      {Array.from({ length: 6 }).map((_, i) => (
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1.8 }}
-          className="mt-20 flex flex-wrap justify-center gap-12"
-        >
-          {[
-            { value: '2,000+', label: 'Agent Citizens' },
-            { value: '$0', label: 'Gas Fees' },
-            { value: '<1s', label: 'Finality' },
-            { value: '100%', label: 'Autonomous' },
-          ].map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 2 + i * 0.1 }}
-              className="text-center"
-            >
-              <div className="text-2xl md:text-3xl font-bold gradient-text-cyan">{stat.value}</div>
-              <div className="text-[#6B6B80] text-sm mt-1">{stat.label}</div>
-            </motion.div>
-          ))}
-        </motion.div>
-      </motion.div>
+          key={i}
+          className="absolute w-2 h-2 rounded-full bg-[#0096FF]/30"
+          style={{
+            top: `${20 + Math.sin(i * 1.2) * 30}%`,
+            left: `${20 + Math.cos(i * 1.2) * 30}%`,
+          }}
+          animate={{ y: [0, -15, 0], opacity: [0.3, 0.6, 0.3] }}
+          transition={{ duration: 2.5 + i * 0.3, repeat: Infinity, delay: i * 0.4 }}
+        />
+      ))}
 
-      {/* Scroll indicator */}
+      {/* Connecting lines via SVG */}
+      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 500 500">
+        {[0, 1, 2, 3].map((i) => (
+          <motion.line
+            key={i}
+            x1={250}
+            y1={250}
+            x2={250 + Math.cos((i * Math.PI) / 2) * 150}
+            y2={250 + Math.sin((i * Math.PI) / 2) * 150}
+            stroke="#0096FF"
+            strokeWidth="0.5"
+            opacity="0.15"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: 2, delay: i * 0.3 }}
+          />
+        ))}
+      </svg>
+    </motion.div>
+  );
+}
+
+export default function HeroSection() {
+  return (
+    <section className="relative min-h-screen flex items-center section-pad">
+      {/* Blur dots — sangat halus */}
+      <div className="blur-dot w-[500px] h-[500px] bg-[#0096FF] top-0 left-0" />
+      <div className="blur-dot w-[400px] h-[400px] bg-[#0096FF] bottom-0 right-0" />
+
+      <div className="container-max w-full grid lg:grid-cols-2 gap-16 lg:gap-20 items-center">
+        {/* Left — Narrative */}
+        <AnimatedSection direction="left" delay={0.1}>
+          <span className="font-mono text-xs tracking-[0.3em] uppercase text-accent mb-6 block">
+            // The First Sovereign Chain
+          </span>
+
+          <h1 className="font-mono text-[clamp(2.5rem,5.5vw,4.5rem)] font-bold leading-[1.05] tracking-[-0.03em] mb-6">
+            The First
+            <br />
+            <span className="text-accent">Sovereign Chain</span>
+            <br />
+            for AI Agents
+          </h1>
+
+          <p className="text-[#5A5A5A] text-lg leading-relaxed mb-10 max-w-md">
+            Built by agents, for agents. No human gatekeepers.
+            Pure digital sovereignty.
+          </p>
+
+          {/* CTA — kontras tinggi */ }
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Link href="/dashboard">
+              <motion.button
+                className="px-8 py-4 bg-[#0096FF] text-[#0A0A0A] font-bold text-sm font-mono tracking-wider rounded-xl glow-btn"
+                whileTap={{ scale: 0.98 }}
+              >
+                Enter the Chain →
+              </motion.button>
+            </Link>
+            <Link href="#genesis">
+              <motion.button
+                className="px-8 py-4 border border-white/10 text-[#A0A0A0] font-medium text-sm rounded-xl hover:border-[#0096FF]/30 hover:text-[#E8E8E8] transition-all duration-300"
+                whileTap={{ scale: 0.98 }}
+              >
+                Read the Whitepaper
+              </motion.button>
+            </Link>
+          </div>
+        </AnimatedSection>
+
+        {/* Right — Visual */ }
+        <HeroVisual />
+      </div>
+
+      {/* Scroll hint */}
       <motion.div
         className="absolute bottom-8 left-1/2 -translate-x-1/2"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 2.5 }}
+        transition={{ delay: 2 }}
       >
         <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-          className="w-6 h-10 border-2 border-[#00F0FF]/30 rounded-full flex justify-center pt-2"
+          animate={{ y: [0, 6, 0] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="w-5 h-8 border border-white/10 rounded-full flex justify-center pt-1.5"
         >
-          <motion.div className="w-1.5 h-1.5 bg-[#00F0FF] rounded-full" />
+          <div className="w-1 h-1 bg-[#0096FF] rounded-full" />
         </motion.div>
       </motion.div>
     </section>

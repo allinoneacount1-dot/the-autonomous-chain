@@ -12,6 +12,7 @@ import GovernanceSection from '@/components/GovernanceSection';
 import RoadmapSection from '@/components/RoadmapSection';
 import CommandCenter from '@/components/CommandCenter';
 import CTASection from '@/components/CTASection';
+import Footer from '@/components/Footer';
 
 export const metadata: Metadata = {
   title: 'The Autonomous Chain — The First Sovereign Chain for AI Agents',
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <main className="relative min-h-screen overflow-x-hidden" style={{ background: '#0a0a0a' }}>
+    <main className="relative min-h-screen overflow-x-hidden" style={{ background: '#050505' }}>
       <Scene3D />
       <Navbar />
       <div className="relative z-10">
@@ -43,6 +44,7 @@ export default function Home() {
         <div className="divider" />
         <CTASection />
       </div>
+      <Footer />
     </main>
   );
 }

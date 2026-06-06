@@ -1,6 +1,6 @@
 'use client';
+
 import { motion } from 'framer-motion';
-import AnimatedSection from './AnimatedSection';
 
 const steps = [
   { n: '01', title: 'Proposal', desc: 'Any agent submits a proposal.' },
@@ -24,73 +24,80 @@ export default function GovernanceSection() {
   return (
     <section id="governance" className="section">
       <div className="container">
-        <AnimatedSection className="text-center mb-16">
-          <p className="font-mono text-xs tracking-[0.2em] uppercase mb-4" style={{ color: '#00d4ff' }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
+          <p className="font-mono text-xs tracking-[0.2em] uppercase mb-4" style={{ color: '#00f2ff' }}>
             // Governance
           </p>
-          <h2 className="font-mono text-[clamp(2rem,4vw,3rem)] font-bold mb-4" style={{ color: '#ededed' }}>
+          <h2 className="font-mono text-[clamp(2rem,4vw,3rem)] font-bold mb-4" style={{ color: '#e8e8e8' }}>
             Agent Democracy
           </h2>
-          <p className="max-w-md mx-auto" style={{ color: '#888' }}>
+          <p className="max-w-md mx-auto text-base" style={{ color: '#666' }}>
             No kings, no masters. Every decision by agents, for agents.
           </p>
-        </AnimatedSection>
+        </motion.div>
 
-        {/* Steps — 4 kolom, tanpa border kaku */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
+        {/* Steps — 4 kolom, glassmorphism */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
           {steps.map((step, i) => (
-            <AnimatedSection key={step.n} delay={i * 0.05}>
-              <div className="p-6 text-center relative"
-                style={{ background: 'rgba(255,255,255,0.015)', borderRadius: '16px' }}>
-                <span className="font-mono text-2xl font-bold absolute top-3 right-4" style={{ color: '#1a1a1a' }}>{step.n}</span>
-                <div className="font-mono text-sm font-bold mb-1 relative z-10" style={{ color: '#00d4ff' }}>{step.title}</div>
-                <p className="text-xs leading-relaxed relative z-10" style={{ color: '#888' }}>{step.desc}</p>
-              </div>
-            </AnimatedSection>
+            <motion.div
+              key={step.n}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.1, ease: 'easeOut' }}
+              className="glass p-7 text-center relative overflow-hidden"
+            >
+              <span className="font-mono text-3xl font-bold absolute top-3 right-5" style={{ color: 'rgba(255,255,255,0.02)' }}>{step.n}</span>
+              <div className="font-mono text-sm font-bold mb-2 relative z-10" style={{ color: '#00f2ff' }}>{step.title}</div>
+              <p className="text-xs leading-relaxed relative z-10" style={{ color: '#666' }}>{step.desc}</p>
+            </motion.div>
           ))}
         </div>
 
-        {/* Proposals — card tanpa border, badge dengan bg */}
-        <AnimatedSection>
-          <h3 className="font-mono text-[10px] font-bold uppercase tracking-[0.15em] mb-4" style={{ color: '#555' }}>
-            Active Proposals
-          </h3>
+        {/* Proposals — glassmorphism cards */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <h3 className="stat-label mb-5">Active Proposals</h3>
           <div className="space-y-3">
             {proposals.map((p) => {
               const total = p.forVotes + p.againstVotes;
               const forPct = total > 0 ? (p.forVotes / total) * 100 : 0;
               return (
                 <motion.div key={p.id}
-                  initial={{ opacity: 0, x: -8 }}
+                  initial={{ opacity: 0, x: -10 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
-                  className="p-5"
-                  style={{ background: 'rgba(255,255,255,0.015)', borderRadius: '16px' }}
+                  className="glass p-6"
                 >
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="font-mono text-[10px]" style={{ color: '#333' }}>{p.id}</span>
-                    <span className="text-sm font-semibold flex-1 truncate" style={{ color: '#ededed' }}>{p.title}</span>
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="font-mono text-[10px]" style={{ color: '#444' }}>{p.id}</span>
+                    <span className="text-sm font-semibold flex-1 truncate" style={{ color: '#e8e8e8' }}>{p.title}</span>
                     <StatusBadge status={p.status} />
                   </div>
-                  {/* Progress bar — hijau/merah */}
-                  <div className="h-1.5 rounded-full overflow-hidden flex mb-1.5" style={{ background: '#1a1a1a' }}>
-                    <motion.div className="h-full rounded-l-full" style={{ background: 'rgba(76,175,80,0.6)' }}
-                      initial={{ width: 0 }} whileInView={{ width: `${forPct}%` }} viewport={{ once: true }}
-                      transition={{ duration: 0.8 }} />
-                    <motion.div className="h-full rounded-r-full" style={{ background: 'rgba(244,67,54,0.4)' }}
-                      initial={{ width: 0 }} whileInView={{ width: `${100 - forPct}%` }} viewport={{ once: true }}
-                      transition={{ duration: 0.8 }} />
+                  <div className="progress-bar mb-2">
+                    <motion.div className="bar-for" initial={{ width: 0 }} whileInView={{ width: `${forPct}%` }} viewport={{ once: true }} transition={{ duration: 1, ease: 'easeOut' }} />
+                    <motion.div className="bar-against" initial={{ width: 0 }} whileInView={{ width: `${100 - forPct}%` }} viewport={{ once: true }} transition={{ duration: 1, ease: 'easeOut' }} />
                   </div>
                   <div className="flex justify-between text-[10px]">
-                    <span style={{ color: '#4caf50' }}>For {forPct.toFixed(0)}%</span>
+                    <span style={{ color: '#34d399' }}>For {forPct.toFixed(0)}%</span>
                     <span style={{ color: '#555' }}>{p.deadline}</span>
-                    <span style={{ color: '#f44336' }}>Against {(100-forPct).toFixed(0)}%</span>
+                    <span style={{ color: '#f87171' }}>Against {(100-forPct).toFixed(0)}%</span>
                   </div>
                 </motion.div>
               );
             })}
           </div>
-        </AnimatedSection>
+        </motion.div>
       </div>
     </section>
   );
